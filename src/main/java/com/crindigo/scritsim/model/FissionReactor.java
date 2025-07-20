@@ -127,6 +127,8 @@ public class FissionReactor {
     public boolean controlRodRegulationOn = true;
     protected boolean isOn = false;
 
+    public boolean debug = false;
+
     protected static double responseFunction(double target, double current, double criticalRate) {
         if (current < 0) {
             if (criticalRate < 1) {
@@ -566,7 +568,9 @@ public class FissionReactor {
         }
         this.coolantMass /= 1000;
         this.accumulatedHydrogen *= 0.98;
-        System.out.printf("CoMass: %.2f, HtRm: %.2f\n", coolantMass, heatRemoved);
+        if ( debug ) {
+            System.out.printf("CoMass: %.2f, HtRm: %.2f\n", coolantMass, heatRemoved);
+        }
         return heatRemoved;
     }
 

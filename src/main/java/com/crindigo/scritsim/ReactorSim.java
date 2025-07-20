@@ -93,7 +93,8 @@ public class ReactorSim
         fr.prepareThermalProperties();
         fr.computeGeometry();
 
-        for ( int i = 0; i < 1200; i++ ) {
+        for ( int i = 0; i < 3200; i++ ) {
+            fr.debug = i % 10 == 0;
             fr.updatePower();
             fr.updateTemperature();
             fr.updatePressure();
@@ -108,10 +109,11 @@ public class ReactorSim
                 break;
             }
 
-            //if (i % 10 == 0) {
-                System.out.printf("%d | Keff = %.5f, Ctrl = %.4f, Pwr: %.2f/%.2f, Temp: %.2f, Pr: %.0f/%.0f\n",
-                        i, fr.kEff, fr.controlRodInsertion, fr.power, fr.maxPower, fr.temperature, fr.pressure, fr.maxPressure);
-            //}
+            if (i % 10 == 0) {
+                System.out.printf("%d | Keff = %.5f, Ctrl = %.4f, Pwr: %.2f/%.2f, Temp: %.2f, Pr: %.0f/%.0f, Dep: %.2f\n",
+                        i, fr.kEff, fr.controlRodInsertion, fr.power, fr.maxPower, fr.temperature,
+                        fr.pressure, fr.maxPressure, fr.fuelDepletion);
+            }
         }
     }
 
