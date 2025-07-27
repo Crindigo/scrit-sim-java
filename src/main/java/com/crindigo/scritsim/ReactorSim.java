@@ -7,8 +7,7 @@ import com.crindigo.scritsim.model.components.FuelRod;
 import com.crindigo.scritsim.model.components.ReactorComponent;
 
 import static com.crindigo.scritsim.Data.Coolants.*;
-import static com.crindigo.scritsim.Data.Fuels.heu235Dioxide;
-import static com.crindigo.scritsim.Data.Fuels.leu235Dioxide;
+import static com.crindigo.scritsim.Data.Fuels.*;
 
 public class ReactorSim
 {
@@ -52,22 +51,28 @@ public class ReactorSim
             //fr.addComponent(makeChannel(distilledWaterCoolant), 5, row);
         }*/
 
-        fr.addComponent(makeFuelRod(leu235Dioxide), 0, 0);
-        fr.addComponent(makeFuelRod(leu235Dioxide), 2, 0);
-        fr.addComponent(makeFuelRod(leu235Dioxide), 0, 2);
-        fr.addComponent(makeFuelRod(leu235Dioxide), 2, 2);
+        // For positioning, X goes left to right, and Y goes from near to far when standing above
+        // the fission reactor MTE facing towards the center.
+        // 0,2  1,2  2,2
+        // 0,1  1,1  2,1
+        // 0,0, 1,0  2,0
+        fr.addComponent(makeFuelRod(leu235), 0, 0);
+        fr.addComponent(makeFuelRod(leu235), 2, 0);
+        fr.addComponent(makeFuelRod(leu235), 0, 2);
+        fr.addComponent(makeFuelRod(leu235), 2, 2);
 
         //fr.addComponent(makeFuelRod(), 0, 1);
         //fr.addComponent(makeFuelRod(), 2,1);
         //fr.addComponent(makeControl(), 0, 1);
         //fr.addComponent(makeControl(), 2, 1);
 
-        fr.addComponent(makeChannel(pressurizedWaterCoolant), 1, 0);
+        fr.addComponent(makeChannel(distilledWaterCoolant), 1, 2);
         //fr.addComponent(makeChannel(pressurizedWaterCoolant), 1, 1);
+        fr.addComponent(makeControl(), 1, 0);
         fr.addComponent(makeControl(), 1, 1);
-        fr.addComponent(makeChannel(pressurizedWaterCoolant), 1, 2);
-        fr.addComponent(makeChannel(pressurizedWaterCoolant), 0, 1);
-        fr.addComponent(makeChannel(pressurizedWaterCoolant), 2, 1);
+        //fr.addComponent(makeChannel(pressurizedWaterCoolant), 1, 2);
+        fr.addComponent(makeChannel(distilledWaterCoolant), 0, 1);
+        fr.addComponent(makeChannel(distilledWaterCoolant), 2, 1);
 
         fr.prepareThermalProperties();
         fr.computeGeometry();
