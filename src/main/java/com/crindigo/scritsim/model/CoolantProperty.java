@@ -5,6 +5,10 @@ import lombok.Setter;
 
 public class CoolantProperty implements ICoolantStats {
 
+    @Getter
+    @Setter
+    private Fluid coolant;
+
     @Setter
     @Getter
     private Fluid hotHPCoolant;
@@ -41,10 +45,11 @@ public class CoolantProperty implements ICoolantStats {
     @Getter
     private final double mass;
 
-    public CoolantProperty(int materialMass, Fluid hotHPCoolant, double moderatorFactor,
+    public CoolantProperty(int materialMass, Fluid coolant, Fluid hotHPCoolant, double moderatorFactor,
                            double coolingFactor,
                            double boilingPoint, double heatOfVaporization,
                            double specificHeatCapacity) {
+        this.coolant = coolant;
         this.hotHPCoolant = hotHPCoolant;
         this.moderatorFactor = moderatorFactor;
         this.coolingFactor = coolingFactor;

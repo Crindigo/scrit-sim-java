@@ -40,4 +40,11 @@ public class CoolantChannel extends ReactorComponent {
     public double getAbsorptionFactor(boolean controlsInserted, boolean isThermal) {
         return isThermal ? coolant.getSlowAbsorptionFactor() : coolant.getFastAbsorptionFactor();
     }
+
+    @Override
+    public String toString() {
+        return "CoolantChannel{" +
+                "weight=" + weight +
+                '}';
+    }
 }

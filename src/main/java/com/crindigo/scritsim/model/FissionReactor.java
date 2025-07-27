@@ -4,6 +4,7 @@ import com.crindigo.scritsim.model.components.ControlRod;
 import com.crindigo.scritsim.model.components.CoolantChannel;
 import com.crindigo.scritsim.model.components.FuelRod;
 import com.crindigo.scritsim.model.components.ReactorComponent;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ public class FissionReactor {
      */
     public static final double airBoilingPoint = 78.8;
 
+    @Getter
     private final ReactorComponent[][] reactorLayout;
     private final List<FuelRod> fuelRods;
     private final List<ControlRod> controlRods;

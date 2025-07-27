@@ -38,4 +38,12 @@ public class FuelRod extends ReactorComponent {
     public ItemStack getDepletedFuel() {
         return fuel.getDepletedFuel(thermalProportion);
     }
+
+    @Override
+    public String toString() {
+        return "FuelRod{" +
+                "weight=" + weight +
+                ", thermalProportion=" + thermalProportion +
+                '}';
+    }
 }
