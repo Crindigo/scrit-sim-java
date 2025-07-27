@@ -31,12 +31,11 @@ public class FissionReactor {
      */
     public static final double airBoilingPoint = 78.8;
 
-    private ReactorComponent[][] reactorLayout;
+    private final ReactorComponent[][] reactorLayout;
     private final List<FuelRod> fuelRods;
     private final List<ControlRod> controlRods;
     private final List<CoolantChannel> coolantChannels;
     private final List<ControlRod> effectiveControlRods;
-    private final List<CoolantChannel> effectiveCoolantChannels;
 
     private double k;
 
@@ -48,8 +47,8 @@ public class FissionReactor {
      * Integers used on variables with direct player control for easier adjustments (normalize this to 0,1)
      */
     public double controlRodInsertion;
-    private int reactorDepth;
-    private double reactorRadius;
+    private final int reactorDepth;
+    private final double reactorRadius;
 
     private boolean moderatorTipped; // set by the type of control rod in the reactor(prepInitialConditions)
 
@@ -63,7 +62,7 @@ public class FissionReactor {
      */
     public double temperature = roomTemperature;
     public double pressure = standardPressure;
-    private double exteriorPressure = standardPressure;
+    private final double exteriorPressure = standardPressure;
     /**
      * Temperature of boiling point in kelvin at standard pressure Determined by a weighted sum of the individual
      * coolant boiling points in {@link FissionReactor#prepareInitialConditions()}
@@ -90,7 +89,7 @@ public class FissionReactor {
     public double fuelDepletion = -1;
     private double neutronPoisonAmount; // can kill reactor if power is lowered and this value is high
     private double decayProductsAmount;
-    private double envTemperature = roomTemperature; // maybe gotten from config per dim
+    private final double envTemperature = roomTemperature; // maybe gotten from config per dim
     public double accumulatedHydrogen;
     private double weightedGenerationTime = 2; // The mean generation time in seconds, accounting for delayed neutrons
 
@@ -101,11 +100,12 @@ public class FissionReactor {
     public double maxPower = 3; // determined by the amount of fuel in reactor and neutron matrices
     public static double zircaloyHydrogenReactionTemperature = 1500;
 
-    private double surfaceArea;
+    private final double surfaceArea;
     public static double thermalConductivity = 45; // 45 W/(m K), for steel
     public static double wallThickness = 0.1;
-    public static double coolantWallThickness = 0.06; // Ideal for a 1-m diameter steel pipe with the given maximum
-    // pressure
+    // 0.06m is ideal for a 1-m diameter steel pipe with the given maximum, and was the original value
+    // This was then / 3 for balance
+    public static double coolantWallThickness = 0.02;    // pressure
     public static double specificHeatCapacity = 420; // 420 J/(kg K), for steel
     public static double convectiveHeatTransferCoefficient = 10; // 10 W/(m^2 K), for slow-moving air
 
@@ -178,13 +178,15 @@ public class FissionReactor {
         controlRods = new ArrayList<>();
         coolantChannels = new ArrayList<>();
         effectiveControlRods = new ArrayList<>();
-        effectiveCoolantChannels = new ArrayList<>();
         // 2pi * r^2 + 2pi * r * l
         surfaceArea = (reactorRadius * reactorRadius) * Math.PI * 2 + reactorDepth * reactorRadius * Math.PI * 2;
         structuralMass = reactorDepth * reactorRadius * reactorRadius * Math.PI *
                 300; // Assuming 300 kg/m^3 when it's basically empty, does not have to be precise
     }
 
+    /**
+     * Should be called before computeGeometry()
+     */
     public void prepareThermalProperties() {
         int idRod = 0, idControl = 0, idChannel = 0;
 
@@ -214,6 +216,7 @@ public class FissionReactor {
                     if (comp instanceof CoolantChannel coolantChannel) {
                         comp.setIndex(idChannel);
                         coolantChannels.add(coolantChannel);
+                        coolantChannel.setWeight(0);
                         idChannel++;
                     }
                 }
@@ -262,6 +265,9 @@ public class FissionReactor {
     public double computeK(boolean addToEffectiveLists, boolean controlRodsInserted) {
         double[][] geometricMatrixNeutrons = new double[fuelRods.size()][fuelRods.size()];
 
+        double[][] geometricMatrixFastNeutrons = new double[fuelRods.size()][fuelRods.size()];
+        double[][] geometricMatrixSlowNeutrons = new double[fuelRods.size()][fuelRods.size()];
+
         /*
          * We calculate geometric factor matrices to determine how many neutrons go from the i-th to the j-th fuel rod
          * This factor is different for slow and fast neutrons because they interact differently with the materials and
@@ -271,9 +277,9 @@ public class FissionReactor {
             for (int j = 0; j < i; j++) {
                 double mij = 0; // Integrates over the moderation factor; read "moderation from I to J"
                 double saij = 0; // Integrates over slow neutron fission, scattering and capture; read "slow absorption
-                                 // from I to J"
+                // from I to J"
                 double faij = 0; // Integrates over fast neutron fission, scattering and capture; read "fast absorption
-                                 // from I to J"
+                // from I to J"
                 FuelRod rodOne = fuelRods.get(i);
                 FuelRod rodTwo = fuelRods.get(j);
 
@@ -297,15 +303,17 @@ public class FissionReactor {
                     if (component == null) {
                         continue;
                     }
-                    if (component.getModerationFactor() > 0) {
-                        mij += component.getModerationFactor();
-                        saij = (faij + saij) / 2; // This is an approximation!
-                    }
 
                     if (!component.samePositionAs(fuelRods.get(i)) &&
                             !component.samePositionAs(fuelRods.get(j))) {
                         saij += component.getAbsorptionFactor(controlRodsInserted, true);
                         faij += component.getAbsorptionFactor(controlRodsInserted, false);
+                    }
+
+                    // Doing this second so that water's absorption is not overbearing compared to its moderation.
+                    if (component.getModerationFactor() > 0) {
+                        mij += component.getModerationFactor();
+                        saij = (faij + saij) / 2; // This is an approximation!
                     }
 
                     if (!addToEffectiveLists || (x == prevX && y == prevY)) {
@@ -318,9 +326,7 @@ public class FissionReactor {
                      * We keep track of which active elements we hit, so we can determine how important they are
                      * relative to the others later
                      */
-                    if (component instanceof CoolantChannel channel) {
-                        channel.addFuelRodPair();
-                    } else if (component instanceof ControlRod controlRod) {
+                    if (component instanceof ControlRod controlRod) {
                         controlRod.addFuelRodPair();
                     }
                 }
@@ -354,6 +360,14 @@ public class FissionReactor {
                 fastNeutronFissionMultiplier = rodOne.getFuel().getFastFissionMultiplier();
                 geometricMatrixNeutrons[j][i] = slow * slowNeutronFissionMultiplier +
                         fast * fastNeutronFissionMultiplier;
+
+                if (addToEffectiveLists) {
+                    geometricMatrixFastNeutrons[i][j] = fast * rodTwo.getFuel().getFastNeutronCaptureCrossSection();
+                    geometricMatrixSlowNeutrons[i][j] = slow * rodTwo.getFuel().getSlowNeutronCaptureCrossSection();
+
+                    geometricMatrixFastNeutrons[j][i] = fast * rodOne.getFuel().getFastNeutronCaptureCrossSection();
+                    geometricMatrixSlowNeutrons[j][i] = slow * rodOne.getFuel().getSlowNeutronCaptureCrossSection();
+                }
             }
         }
 
@@ -379,6 +393,17 @@ public class FissionReactor {
             for (int i = 0; i < fuelRods.size(); i++) {
                 fuelRods.get(i).setWeight(vector[i]);
             }
+
+            double[] fastVector = Arrays.copyOf(vector, vector.length);
+            double[] slowVector = Arrays.copyOf(vector, vector.length);
+            multiply(geometricMatrixFastNeutrons, fastVector);
+            multiply(geometricMatrixSlowNeutrons, slowVector);
+            for (int i = 0; i < fuelRods.size(); i++) {
+                if (slowVector[i] + fastVector[i] == 0) {
+                    fuelRods.get(i).setThermalProportion(0);
+                }
+                fuelRods.get(i).setThermalProportion(slowVector[i] / (slowVector[i] + fastVector[i]));
+            }
         }
 
         // We must still correct for the reactor depth.
@@ -388,7 +413,6 @@ public class FissionReactor {
 
     public void computeGeometry() {
         effectiveControlRods.clear();
-        effectiveCoolantChannels.clear();
         moderatorTipped = false;
 
         // We compute K twice to see the effectiveness of the control rods.
@@ -409,6 +433,7 @@ public class FissionReactor {
             neutronToPowerConversion += i.getFuel().getReleasedHeatEnergy() / i.getFuel().getReleasedNeutrons();
             decayNeutrons += i.getFuel().getDecayRate();
         }
+        computeCoolantWeights();
 
         if (fuelRods.size() > 1) {
             neutronToPowerConversion /= fuelRods.size();
@@ -419,14 +444,34 @@ public class FissionReactor {
             maxPower = 0.1 * Config.nuclear.nuclearPowerMultiplier;
         }
         /*
-         * We give each control rod and coolant channel a weight depending on how many fuel rods they affect
+         * We give each control rod a weight depending on how many fuel rods they affect
          */
-
-        this.computeCoolantChannelWeights();
 
         controlRodFactor = ControlRod.controlRodFactor(effectiveControlRods, this.controlRodInsertion);
 
         this.prepareInitialConditions();
+    }
+
+    /**
+     * Loops over all the coolant channels and determine which ones are adjacent to fuel rods
+     */
+    private final int[] dx = { 0, 1, 0, -1 };
+    private final int[] dy = { 1, 0, -1, 0 };
+
+    protected void computeCoolantWeights() {
+        for (FuelRod rod : fuelRods) {
+            // Loop over all four directions
+            for (int i = 0; i < 4; i++) {
+                int x = rod.getX() + dx[i];
+                int y = rod.getY() + dy[i];
+                if (x < 0 || x >= this.reactorLayout.length || y < 0 || y >= this.reactorLayout[x].length)
+                    continue;
+                ReactorComponent comp = this.reactorLayout[x][y];
+                if (comp instanceof CoolantChannel coolantChannel) {
+                    coolantChannel.addWeight(rod.getWeight());
+                }
+            }
+        }
     }
 
     /**
@@ -443,20 +488,6 @@ public class FissionReactor {
             }
         }
         ControlRod.normalizeWeights(effectiveControlRods, totalWeight, totalWorth);
-    }
-
-    /**
-     * Loops over all the coolant channels, determines which ones actually affect reactivity, and gives them a weight
-     * depending on how many fuel rods they affect
-     */
-    protected void computeCoolantChannelWeights() {
-        for (CoolantChannel channel : coolantChannels) {
-            channel.computeWeightFromFuelRodMap();
-            if (channel.getWeight() > 0) {
-                effectiveCoolantChannels.add(channel);
-            }
-        }
-        CoolantChannel.normalizeWeights(effectiveCoolantChannels);
     }
 
     public void resetFuelDepletion() {
@@ -532,7 +563,7 @@ public class FissionReactor {
                 // https://physics.stackexchange.com/questions/153434/heat-transfer-between-the-bulk-of-the-fluid-inside-the-pipe-and-the-pipe-externa
                 double heatFluxPerAreaAndTemp = 1 /
                         (1 / prop.getCoolingFactor() + coolantWallThickness / thermalConductivity);
-                double idealHeatFlux = heatFluxPerAreaAndTemp * 4 * reactorDepth *
+                double idealHeatFlux = heatFluxPerAreaAndTemp * channel.getWeight() * reactorDepth *
                         (temperature - cooledTemperature);
 
                 double idealFluidUsed = idealHeatFlux / heatRemovedPerLiter;
@@ -597,7 +628,7 @@ public class FissionReactor {
             // https://physics.stackexchange.com/questions/153434/heat-transfer-between-the-bulk-of-the-fluid-inside-the-pipe-and-the-pipe-externa
             double heatFluxPerAreaAndTemp = 1 /
                     (1 / prop.getCoolingFactor() + coolantWallThickness / thermalConductivity);
-            double idealHeatFlux = heatFluxPerAreaAndTemp * 4 * reactorDepth *
+            double idealHeatFlux = heatFluxPerAreaAndTemp * channel.getWeight() * reactorDepth *
                     (hypotheticalTemperature - cooledTemperature);
 
             double idealFluidUsed = idealHeatFlux / heatRemovedPerLiter;
@@ -772,6 +803,5 @@ public class FissionReactor {
         controlRods.clear();
         coolantChannels.clear();
         effectiveControlRods.clear();
-        effectiveCoolantChannels.clear();
     }
 }

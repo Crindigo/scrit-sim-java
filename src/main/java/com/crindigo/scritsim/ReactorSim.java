@@ -5,36 +5,13 @@ import com.crindigo.scritsim.model.components.ControlRod;
 import com.crindigo.scritsim.model.components.CoolantChannel;
 import com.crindigo.scritsim.model.components.FuelRod;
 
+import static com.crindigo.scritsim.Data.Coolants.distilledWaterCoolant;
+import static com.crindigo.scritsim.Data.Fluids.distilledWater;
+import static com.crindigo.scritsim.Data.Fluids.highPressureSteam;
+import static com.crindigo.scritsim.Data.Fuels.leu235;
+
 public class ReactorSim
 {
-    private final Fluid distilledWater = new Fluid("distilled_water", 293);
-    private final Fluid highPressureSteam = new Fluid("high_pressure_steam", 500);
-
-    private final CoolantProperty distilledWaterCoolant =
-            new CoolantProperty(18, highPressureSteam, 1., 1000,
-            373, 2260000, 4168.)
-            .setAccumulatesHydrogen(true);
-
-    private final FissionFuelProperty leu235 =
-            FissionFuelProperty.builder("leu235", 1500, 75000, 3.5)
-                    .slowNeutronCaptureCrossSection(1.5)
-                    .slowNeutronFissionCrossSection(1.5)
-                    .requiredNeutrons(1)
-                    .releasedNeutrons(2.5)
-                    .releasedHeatEnergy(0.01)
-                    .decayRate(0.025)
-                    .build();
-
-    private final FissionFuelProperty heu235 =
-            FissionFuelProperty.builder("heu235", 1800, 60000, 2.5)
-                    .slowNeutronCaptureCrossSection(2)
-                    .slowNeutronFissionCrossSection(2)
-                    .requiredNeutrons(1)
-                    .releasedNeutrons(2.5)
-                    .releasedHeatEnergy(0.01)
-                    .decayRate(0.05)
-                    .build();
-
     private FuelRod makeFuelRod() {
         return new FuelRod(leu235.getMaxTemperature(), 1, leu235, 650);
     }
@@ -73,7 +50,7 @@ public class ReactorSim
             }
             fr.addComponent(makeChannel(), 1, row);
             //fr.addComponent(makeChannel(), 3, row);
-            fr.addComponent(makeChannel(), 5, row);
+            //fr.addComponent(makeChannel(), 5, row);
         }
 
         /*fr.addComponent(makeFuelRod(), 0, 0);

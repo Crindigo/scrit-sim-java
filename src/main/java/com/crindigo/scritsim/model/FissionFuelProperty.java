@@ -2,6 +2,11 @@ package com.crindigo.scritsim.model;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Builder
 public class FissionFuelProperty implements IFissionFuelStats {
@@ -40,6 +45,13 @@ public class FissionFuelProperty implements IFissionFuelStats {
     @Getter
     private String id;
 
+    @Getter
+    @Setter
+    private Function<Double, ItemStack> depletedFuelSupplier;
+
+    @Setter
+    private Supplier<List<ItemStack>> allDepletedFuels;
+
     public static FissionFuelPropertyBuilder builder(String id, int maxTemperature, int duration,
                                                      double neutronGenerationTime) {
         return new FissionFuelPropertyBuilder()
@@ -47,5 +59,15 @@ public class FissionFuelProperty implements IFissionFuelStats {
                 .maxTemperature(maxTemperature)
                 .duration(duration)
                 .neutronGenerationTime(neutronGenerationTime);
+    }
+
+    @Override
+    public List<ItemStack> getDepletedFuels() {
+        return allDepletedFuels.get();
+    }
+
+    @Override
+    public ItemStack getDepletedFuel(double thermalRatio) {
+        return depletedFuelSupplier.apply(thermalRatio);
     }
 }

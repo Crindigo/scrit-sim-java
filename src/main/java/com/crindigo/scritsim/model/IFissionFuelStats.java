@@ -1,5 +1,7 @@
 package com.crindigo.scritsim.model;
 
+import java.util.List;
+
 public interface IFissionFuelStats {
 
     /**
@@ -89,4 +91,15 @@ public interface IFissionFuelStats {
      * @return A unique ID for this fuel.
      */
     String getId();
+
+    /**
+     * @return A collection of all of the possible items that this fuel can be depleted into.
+     */
+    List<ItemStack> getDepletedFuels();
+
+    /**
+     * @param thermalRatio The ratio of captured thermal neutrons to total neutrons.
+     * @return An item stack that represents the depleted fuel given the ratio of thermal neutrons.
+     */
+    ItemStack getDepletedFuel(double thermalRatio);
 }

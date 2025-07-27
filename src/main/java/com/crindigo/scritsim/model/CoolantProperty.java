@@ -33,6 +33,12 @@ public class CoolantProperty implements ICoolantStats {
     private boolean accumulatesHydrogen = false;
 
     @Getter
+    private double slowAbsorptionFactor;
+
+    @Getter
+    private double fastAbsorptionFactor;
+
+    @Getter
     private final double mass;
 
     public CoolantProperty(int materialMass, Fluid hotHPCoolant, double moderatorFactor,
@@ -59,5 +65,15 @@ public class CoolantProperty implements ICoolantStats {
 
     public Fluid getHotCoolant() {
         return hotHPCoolant;
+    }
+
+    public CoolantProperty setFastAbsorptionFactor(double fastAbsorptionFactor) {
+        this.fastAbsorptionFactor = fastAbsorptionFactor;
+        return this;
+    }
+
+    public CoolantProperty setSlowAbsorptionFactor(double slowAbsorptionFactor) {
+        this.slowAbsorptionFactor = slowAbsorptionFactor;
+        return this;
     }
 }

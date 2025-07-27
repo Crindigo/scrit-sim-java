@@ -14,7 +14,6 @@ public class CoolantChannel extends ReactorComponent {
     @Setter
     @Getter
     private double weight;
-    private int relatedFuelRodPairs;
 
     @Getter
     private final CoolantHandler inputHandler;
@@ -34,21 +33,11 @@ public class CoolantChannel extends ReactorComponent {
         this.outputHandler = outputHandler;
     }
 
-    public static void normalizeWeights(List<CoolantChannel> effectiveCoolantChannels) {
-        double sum = 0;
-        for (CoolantChannel channel : effectiveCoolantChannels) {
-            sum += channel.weight;
-        }
-        for (CoolantChannel channel : effectiveCoolantChannels) {
-            channel.weight /= sum;
-        }
+    public void addWeight(double weight) {
+        this.weight += weight;
     }
 
-    public void addFuelRodPair() {
-        relatedFuelRodPairs++;
-    }
-
-    public void computeWeightFromFuelRodMap() {
-        this.weight = relatedFuelRodPairs * 2;
+    public double getAbsorptionFactor(boolean controlsInserted, boolean isThermal) {
+        return isThermal ? coolant.getSlowAbsorptionFactor() : coolant.getFastAbsorptionFactor();
     }
 }
