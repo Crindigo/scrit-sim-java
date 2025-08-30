@@ -56,7 +56,7 @@ public class ReactorSim
         // 0,2  1,2  2,2
         // 0,1  1,1  2,1
         // 0,0, 1,0  2,0
-        fr.addComponent(makeFuelRod(leu235), 0, 0);
+        fr.addComponent(makeFuelRod(heu235), 0, 0);
         fr.addComponent(makeFuelRod(leu235), 2, 0);
         fr.addComponent(makeFuelRod(leu235), 0, 2);
         fr.addComponent(makeFuelRod(leu235), 2, 2);
@@ -86,8 +86,8 @@ public class ReactorSim
             }
         }
 
-        for ( int i = 0; i < 3200; i++ ) {
-            fr.debug = i % 10 == 0;
+        for ( int i = 0; i < 32000; i++ ) {
+            fr.debug = i % 100 == 0;
             fr.updatePower();
             fr.updateTemperature();
             fr.updatePressure();
@@ -102,7 +102,7 @@ public class ReactorSim
                 break;
             }
 
-            if (i % 10 == 0) {
+            if (i % 100 == 0) {
                 System.out.printf("%d | Keff = %.5f, Ctrl = %.4f, Pwr: %.2f/%.2f, Temp: %.2f, Pr: %.0f/%.0f, Dep: %.2f\n",
                         i, fr.kEff, fr.controlRodInsertion, fr.power, fr.maxPower, fr.temperature,
                         fr.pressure, fr.maxPressure, fr.fuelDepletion);
