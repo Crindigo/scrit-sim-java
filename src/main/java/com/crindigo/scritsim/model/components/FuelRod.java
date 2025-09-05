@@ -17,9 +17,12 @@ public class FuelRod extends ReactorComponent {
     @Setter
     private double thermalProportion;
 
+    private double depletionPoint;
+
     public FuelRod(double maxTemperature, double thermalConductivity, IFissionFuelStats fuel, double mass) {
         super(0, maxTemperature, thermalConductivity, mass, true);
         this.fuel = fuel;
+        this.depletionPoint = fuel.getDuration();
     }
 
     public double getDuration() {
@@ -37,6 +40,14 @@ public class FuelRod extends ReactorComponent {
 
     public ItemStack getDepletedFuel() {
         return fuel.getDepletedFuel(thermalProportion);
+    }
+
+    public boolean isDepleted(double totalDepletion) {
+        return this.depletionPoint <= totalDepletion * weight;
+    }
+
+    public void markUndepleted() {
+        this.depletionPoint += fuel.getDuration();
     }
 
     @Override

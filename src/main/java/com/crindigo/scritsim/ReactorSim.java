@@ -1,18 +1,22 @@
 package com.crindigo.scritsim;
 
 import com.crindigo.scritsim.model.*;
-import com.crindigo.scritsim.model.components.ControlRod;
-import com.crindigo.scritsim.model.components.CoolantChannel;
-import com.crindigo.scritsim.model.components.FuelRod;
-import com.crindigo.scritsim.model.components.ReactorComponent;
+import com.crindigo.scritsim.model.components.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.crindigo.scritsim.Data.Coolants.*;
 import static com.crindigo.scritsim.Data.Fuels.*;
 
 public class ReactorSim
 {
+    private List<FuelRod> fuelRods = new ArrayList<>();
+
     private FuelRod makeFuelRod(FissionFuelProperty fuel) {
-        return new FuelRod(fuel.getMaxTemperature(), 1, fuel, 650);
+        FuelRod rod = new FuelRod(fuel.getMaxTemperature(), 1, fuel, 650);
+        fuelRods.add(rod);
+        return rod;
     }
 
     private CoolantChannel makeChannel(CoolantProperty coolant) {
@@ -23,8 +27,12 @@ public class ReactorSim
         return new CoolantChannel(100050, 0, coolant, 1000, in, out);
     }
 
-    private ControlRod makeControl() {
-        return new ControlRod(100000, false, 1, 800);
+    private ControlRod makeControl(boolean hasModeratorTip) {
+        return new ControlRod(100000, hasModeratorTip, 1, 800);
+    }
+
+    private Moderator makeModerator(ModeratorProperty moderator) {
+        return new Moderator(moderator, 0.5, 800);
     }
 
     private void run() {
@@ -32,7 +40,7 @@ public class ReactorSim
         // F C F C F C F
         // X C X C X C X
         // F C F C F C F
-        FissionReactor fr = new FissionReactor(3, 2, 0.5);
+        FissionReactor fr = new FissionReactor(5, 4, 0.5);
 
         /*for ( int row = 0; row < 7; row++ ) {
             if ( row % 2 == 0 ) {
@@ -56,38 +64,59 @@ public class ReactorSim
         // 0,2  1,2  2,2
         // 0,1  1,1  2,1
         // 0,0, 1,0  2,0
-        fr.addComponent(makeFuelRod(heu235), 0, 0);
-        fr.addComponent(makeFuelRod(leu235), 2, 0);
-        fr.addComponent(makeFuelRod(leu235), 0, 2);
-        fr.addComponent(makeFuelRod(leu235), 2, 2);
+        fr.addComponent(makeFuelRod(heu235Dioxide), 1, 1);
+        fr.addComponent(makeFuelRod(heu235Dioxide), 3, 1);
+        fr.addComponent(makeFuelRod(heu235Dioxide), 1, 3);
+        fr.addComponent(makeFuelRod(heu235Dioxide), 3, 3);
 
         //fr.addComponent(makeFuelRod(), 0, 1);
         //fr.addComponent(makeFuelRod(), 2,1);
         //fr.addComponent(makeControl(), 0, 1);
         //fr.addComponent(makeControl(), 2, 1);
 
-        fr.addComponent(makeChannel(distilledWaterCoolant), 1, 2);
-        //fr.addComponent(makeChannel(pressurizedWaterCoolant), 1, 1);
-        fr.addComponent(makeControl(), 1, 0);
-        fr.addComponent(makeControl(), 1, 1);
+        fr.addComponent(makeChannel(boilingWaterCoolant), 2, 3);
+        //fr.addComponent(makeChannel(boilingWaterCoolant), 2, 2);
+        fr.addComponent(makeControl(false), 2, 1);
+        fr.addComponent(makeControl(false), 2, 2);
         //fr.addComponent(makeChannel(pressurizedWaterCoolant), 1, 2);
-        fr.addComponent(makeChannel(distilledWaterCoolant), 0, 1);
-        fr.addComponent(makeChannel(distilledWaterCoolant), 2, 1);
+        fr.addComponent(makeChannel(boilingWaterCoolant), 1, 2);
+        fr.addComponent(makeChannel(boilingWaterCoolant), 3, 2);
+
+        fr.addComponent(makeChannel(boilingWaterCoolant), 0, 1);
+        fr.addComponent(makeChannel(boilingWaterCoolant), 0, 3);
+        fr.addComponent(makeChannel(boilingWaterCoolant), 4, 1);
+        fr.addComponent(makeChannel(boilingWaterCoolant), 4, 3);
+
+        fr.addComponent(makeChannel(boilingWaterCoolant), 1, 0);
+        fr.addComponent(makeChannel(boilingWaterCoolant), 3, 0);
+        fr.addComponent(makeChannel(boilingWaterCoolant), 1, 4);
+        fr.addComponent(makeChannel(boilingWaterCoolant), 3, 4);
 
         fr.prepareThermalProperties();
         fr.computeGeometry();
 
         ReactorComponent[][] reactorLayout = fr.getReactorLayout();
-        for ( int y = 0; y < 3; y++ ) {
-            for ( int x = 0; x < 3; x++ ) {
+        for ( int y = 0; y < 5; y++ ) {
+            for ( int x = 0; x < 5; x++ ) {
                 if ( reactorLayout[x][y] != null ) {
                     System.out.println("(" + x + ", " + y + ") " + reactorLayout[x][y]);
                 }
             }
         }
 
-        for ( int i = 0; i < 32000; i++ ) {
+        int consumedFuel = 0;
+        for ( int i = 0; i < 10100; i++ ) {
             fr.debug = i % 100 == 0;
+
+            // scrit checks fuel depletion before updating state
+            for (FuelRod fuelRod : fuelRods) {
+                if (fuelRod.isDepleted(fr.fuelDepletion)) {
+                    fuelRod.markUndepleted();
+                    consumedFuel++;
+                    System.out.println("Consumed fuel " + consumedFuel);
+                }
+            }
+
             fr.updatePower();
             fr.updateTemperature();
             fr.updatePressure();

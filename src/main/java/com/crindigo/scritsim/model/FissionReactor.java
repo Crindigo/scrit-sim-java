@@ -548,6 +548,7 @@ public class FissionReactor {
     public double makeCoolantFlow() {
         double heatRemoved = 0;
         coolantMass = 0;
+        int totalFlow = 0;
         for (CoolantChannel channel : coolantChannels) {
             FluidStack tryFluidDrain = channel.getInputHandler().getFluidTank().drain(16000, false);
             if (tryFluidDrain != null) {
@@ -584,6 +585,7 @@ public class FissionReactor {
                 FluidStack HPCoolant = new FluidStack(
                         prop.getHotCoolant(), actualFlowRate);
 
+                totalFlow += actualFlowRate;
                 //System.out.println("coolant flow: " + actualFlowRate);
                 channel.getInputHandler().getFluidTank().drain(actualFlowRate, true);
                 channel.getOutputHandler().getFluidTank().fill(HPCoolant, true);
@@ -605,7 +607,7 @@ public class FissionReactor {
         this.coolantMass /= 1000;
         this.accumulatedHydrogen *= 0.98;
         if ( debug ) {
-            System.out.printf("CoMass: %.2f, HtRm: %.2f\n", coolantMass, heatRemoved);
+            System.out.printf("CoMass: %.2f, HtRm: %.2f, CoUsed: %d L\n", coolantMass, heatRemoved, totalFlow);
         }
         return heatRemoved;
     }
@@ -751,8 +753,8 @@ public class FissionReactor {
         if ( temperature > maxTemperature - 250 ) {
             // SECTION ADDED FOR TESTING
             // Update insertion regardless of kEff
-            this.controlRodInsertion += 0.02;
-            adjustFactor = true;
+            //this.controlRodInsertion += 0.02;
+            //adjustFactor = true;
         } else {
 
 
