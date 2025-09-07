@@ -77,7 +77,7 @@ public class Data
                         .build();
 
         public static final FissionFuelProperty heu235Dioxide =
-                FissionFuelProperty.builder("heu235Dioxide", 1800, 40000000, 2.5)
+                FissionFuelProperty.builder("heu235Dioxide", 1800, 400000, 2.5)
                         .fastNeutronCaptureCrossSection(0.3)
                         .fastNeutronFissionCrossSection(0.15)
                         .slowNeutronCaptureCrossSection(2)

@@ -1,5 +1,7 @@
 package com.crindigo.scritsim.ui;
 
+import com.crindigo.scritsim.model.components.ReactorComponent;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -14,14 +16,43 @@ public class SimulatorUI extends JFrame
     GridLayout reactorLayout = new GridLayout(0,3);
     JPanel reactorComponents = new JPanel();
 
+    GridLayout paletteLayout = new GridLayout(0, 3);
+    JPanel palettePanel = new JPanel();
+
+    ComponentPalette.Paint currentPaint = null;
+
     public SimulatorUI(String name) {
         super(name);
         setResizable(true);
     }
 
-    public void initGaps() {
+    public void initDropdowns() {
         sizeComboBox = new JComboBox<>(sizeOptions);
         depthComboBox = new JComboBox<>(depthOptions);
+    }
+
+    private void initPalette() {
+        ComponentPalette.init();
+        palettePanel.setLayout(paletteLayout);
+        Dimension square = new Dimension(50, 50);
+        final ButtonGroup group = new ButtonGroup();
+        ComponentPalette.allPaints().forEach(paint -> {
+            JToggleButton b;
+            if ( paint.image.isEmpty() ) {
+                b = new JToggleButton(" ");
+            } else {
+                b = new JToggleButton(new ImageIcon(getClass().getResource("/" + paint.image)));
+            }
+            b.setPreferredSize(square);
+            b.setMaximumSize(square);
+            b.setToolTipText(paint.name);
+            b.addActionListener(e -> {
+                currentPaint = paint;
+                System.out.println("current paint = " + currentPaint.name);
+            });
+            palettePanel.add(b);
+            group.add(b);
+        });
     }
 
     private void updateReactorLayout(int diameter) {
@@ -32,9 +63,12 @@ public class SimulatorUI extends JFrame
         for (int i = 0; i < diameter; i++) {
             for (int j = 0; j < diameter; j++) {
                 if (Math.pow(i - radius, 2) + Math.pow(j - radius, 2) < Math.pow(radius + 0.5f, 2)) {
-                    JButton b = new JButton("X");
+                    JButton b = new JButton(new ImageIcon(getClass().getResource("/fuel_rod_mox_susy.png")));
                     b.setPreferredSize(square);
+                    b.setMaximumSize(square);
+                    b.setMinimumSize(square);
                     b.setActionCommand(j + "," + (diameter - 1 - i)); // Y=0 is at bottom
+                    b.setToolTipText("<html>Low-Grade MOX<br>X: " + j + "<br>Y: " + (diameter - 1 - i));
                     b.addActionListener(this::reactorButtonClicked);
                     reactorComponents.add(b);
                 } else {
@@ -54,25 +88,34 @@ public class SimulatorUI extends JFrame
     }
 
     public void addComponentsToPane(final Container pane) {
-        initGaps();
+        initDropdowns();
         reactorComponents.setLayout(reactorLayout);
         JPanel controls = new JPanel();
         controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
 
-        JPanel diameterRow = new JPanel();
-        diameterRow.add(new JLabel("Diameter:"));
-        sizeComboBox.setMaximumSize(sizeComboBox.getPreferredSize());
-        diameterRow.add(sizeComboBox);
-        diameterRow.setMaximumSize(diameterRow.getPreferredSize());
-        controls.add(diameterRow);
+        JPanel topLeft = new JPanel();
+        topLeft.setLayout(null);
+        topLeft.setPreferredSize(new Dimension(200, 140));
 
-        JPanel depthRow = new JPanel();
-        depthRow.add(new JLabel("Depth:"));
-        depthComboBox.setMaximumSize(depthComboBox.getPreferredSize());
-        depthRow.add(depthComboBox);
-        depthRow.setMaximumSize(depthRow.getPreferredSize());
-        controls.add(depthRow);
-        controls.add(applyButton);
+        JLabel diameterLabel = new JLabel("Diameter:");
+        JLabel depthLabel = new JLabel("Depth:");
+
+        topLeft.add(diameterLabel);
+        topLeft.add(sizeComboBox);
+        topLeft.add(depthLabel);
+        topLeft.add(depthComboBox);
+        topLeft.add(applyButton);
+
+        diameterLabel.setBounds(10, 10, 80, 30);
+        sizeComboBox.setBounds(100, 10, 90, 30);
+        depthLabel.setBounds(10, 50, 80, 30);
+        depthComboBox.setBounds(100, 50, 90, 30);
+        applyButton.setBounds(10, 90, 180, 30);
+
+        controls.add(topLeft);
+
+        initPalette();
+        controls.add(palettePanel);
 
         applyButton.addActionListener(e -> {
             String diameter = (String) sizeComboBox.getSelectedItem();
