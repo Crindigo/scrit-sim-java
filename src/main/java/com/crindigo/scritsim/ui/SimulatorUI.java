@@ -16,6 +16,8 @@ public class SimulatorUI extends JFrame
     GridLayout reactorLayout = new GridLayout(0,3);
     JPanel reactorComponents = new JPanel();
 
+    ComponentPalette.Paint[][] reactorCanvas = new ComponentPalette.Paint[3][3];
+
     GridLayout paletteLayout = new GridLayout(0, 3);
     JPanel palettePanel = new JPanel();
 
@@ -58,18 +60,21 @@ public class SimulatorUI extends JFrame
     private void updateReactorLayout(int diameter) {
         reactorLayout.setColumns(diameter);
         reactorComponents.removeAll();
+        resizeCanvas(diameter);
         Dimension square = new Dimension(50, 50);
         int radius = (diameter - 1) / 2;
         for (int i = 0; i < diameter; i++) {
-            for (int j = 0; j < diameter; j++) {
-                if (Math.pow(i - radius, 2) + Math.pow(j - radius, 2) < Math.pow(radius + 0.5f, 2)) {
-                    JButton b = new JButton(new ImageIcon(getClass().getResource("/fuel_rod_mox_susy.png")));
+            for (int x = 0; x < diameter; x++) {
+                if (Math.pow(i - radius, 2) + Math.pow(x - radius, 2) < Math.pow(radius + 0.5f, 2)) {
+                    int y = diameter - 1 - i;
+
+                    JButton b = new JButton();
                     b.setPreferredSize(square);
                     b.setMaximumSize(square);
                     b.setMinimumSize(square);
-                    b.setActionCommand(j + "," + (diameter - 1 - i)); // Y=0 is at bottom
-                    b.setToolTipText("<html>Low-Grade MOX<br>X: " + j + "<br>Y: " + (diameter - 1 - i));
+                    b.setActionCommand(x + "," + y); // Y=0 is at bottom
                     b.addActionListener(this::reactorButtonClicked);
+                    updateButton(b, x, y, reactorCanvas[x][y]);
                     reactorComponents.add(b);
                 } else {
                     JLabel wall = new JLabel(" ");
@@ -83,8 +88,53 @@ public class SimulatorUI extends JFrame
         this.pack();
     }
 
+    private void resizeCanvas(int diameter) {
+        int oldDiameter = reactorCanvas.length;
+        // Copy existing items to the new canvas, when sizing up, keep old items in the middle.
+        // an item at 1,1 diameter 3 becomes 2,2 diameter 5, or 3,3 diameter 7.
+        // if you have an item at 2,0 D=5 it would be 1,-1 and outside the canvas if going to D=3.
+        // an item at 2,4 D=5 would be 1,3 and also outside the canvas if going to D=3.
+        ComponentPalette.Paint[][] newCanvas = new ComponentPalette.Paint[diameter][diameter];
+        int adjustment = (diameter - oldDiameter) / 2;
+        for ( int y = 0; y < oldDiameter; y++ ) {
+            for ( int x = 0; x < oldDiameter; x++ ) {
+                int newX = x + adjustment;
+                int newY = y + adjustment;
+                if ( newX < 0 || newX >= diameter || newY < 0 || newY >= diameter) {
+                    continue;
+                }
+                newCanvas[newX][newY] = reactorCanvas[x][y];
+            }
+        }
+
+        reactorCanvas = newCanvas;
+    }
+
     public void reactorButtonClicked(ActionEvent e) {
-        System.out.println(e.getActionCommand());
+        if ( currentPaint == null ) {
+            return;
+        }
+
+        String[] xy = e.getActionCommand().split(",");
+        int x = Integer.parseInt(xy[0]);
+        int y = Integer.parseInt(xy[1]);
+        System.out.println("Paint " + currentPaint.name + " to " + x + "," + y);
+
+        reactorCanvas[x][y] = currentPaint;
+        JButton b = (JButton) e.getSource();
+        updateButton(b, x, y, currentPaint);
+    }
+
+    private void updateButton(JButton b, int x, int y, ComponentPalette.Paint paint) {
+        if ( paint == null ) {
+            paint = ComponentPalette.empty;
+        }
+        if ( paint.image.isEmpty() ) {
+            b.setIcon(null);
+        } else {
+            b.setIcon(new ImageIcon(getClass().getResource("/" + paint.image)));
+        }
+        b.setToolTipText("<html>" + paint.name + "<br>X: " + x + "<br>Y: " + y);
     }
 
     public void addComponentsToPane(final Container pane) {

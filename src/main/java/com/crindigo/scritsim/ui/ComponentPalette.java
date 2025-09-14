@@ -17,6 +17,8 @@ public class ComponentPalette
     public static List<Paint> moderators = new ArrayList<>(2);
     public static List<Paint> controls = new ArrayList<>(2);
 
+    public static Paint empty = new Paint(null, "", "Empty");
+
     public static void init()
     {
         fuels.add(new Paint(makeFuelRod(Data.Fuels.leu235), "fuel_rod_leu235.png", "LEU-235"));
@@ -46,7 +48,7 @@ public class ComponentPalette
         all.addAll(coolants);
         all.addAll(moderators);
         all.addAll(controls);
-        all.add(new Paint(null, "", "Empty"));
+        all.add(empty);
         return all;
     }
 
