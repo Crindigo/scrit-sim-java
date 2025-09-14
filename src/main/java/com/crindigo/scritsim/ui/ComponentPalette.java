@@ -9,6 +9,7 @@ import com.crindigo.scritsim.model.components.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class ComponentPalette
 {
@@ -53,34 +54,34 @@ public class ComponentPalette
     }
 
     public static class Paint {
-        public ReactorComponent component;
+        public Supplier<ReactorComponent> componentSupplier;
         public String image;
         public String name;
 
-        public Paint(ReactorComponent component, String image, String name) {
-            this.component = component;
+        public Paint(Supplier<ReactorComponent> componentSupplier, String image, String name) {
+            this.componentSupplier = componentSupplier;
             this.image = image;
             this.name = name;
         }
     }
 
-    private static FuelRod makeFuelRod(FissionFuelProperty fuel) {
-        return new FuelRod(fuel.getMaxTemperature(), 1, fuel, 650);
+    private static Supplier<ReactorComponent> makeFuelRod(FissionFuelProperty fuel) {
+        return () -> new FuelRod(fuel.getMaxTemperature(), 1, fuel, 650);
     }
 
-    private static CoolantChannel makeCoolant(CoolantProperty coolant) {
+    private static Supplier<ReactorComponent> makeCoolant(CoolantProperty coolant) {
         CoolantHandler in = new CoolantHandler(coolant.getCoolant(), 16000);
         in.getFluidTank().setInfinite(true);
         CoolantHandler out = new CoolantHandler(coolant.getHotCoolant(), 16000);
         out.getFluidTank().setInfinite(true);
-        return new CoolantChannel(100050, 0, coolant, 1000, in, out);
+        return () -> new CoolantChannel(100050, 0, coolant, 1000, in, out);
     }
 
-    private static ControlRod makeControl(boolean hasModeratorTip) {
-        return new ControlRod(100000, hasModeratorTip, 1, 800);
+    private static Supplier<ReactorComponent> makeControl(boolean hasModeratorTip) {
+        return () -> new ControlRod(100000, hasModeratorTip, 1, 800);
     }
 
-    private static Moderator makeModerator(ModeratorProperty moderator) {
-        return new Moderator(moderator, 0.5, 800);
+    private static Supplier<ReactorComponent> makeModerator(ModeratorProperty moderator) {
+        return () -> new Moderator(moderator, 0.5, 800);
     }
 }

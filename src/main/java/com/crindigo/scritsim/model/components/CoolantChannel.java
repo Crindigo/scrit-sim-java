@@ -20,6 +20,11 @@ public class CoolantChannel extends ReactorComponent {
     @Getter
     private final CoolantHandler outputHandler;
 
+    /** The amount of hot coolant generated in the last reactor step. */
+    @Setter
+    @Getter
+    private int generatedHotCoolant;
+
     // Allows fission reactors to heat up less than a full liter of coolant.
     public double partialCoolant;
 

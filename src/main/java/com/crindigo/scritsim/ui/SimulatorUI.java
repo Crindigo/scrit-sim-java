@@ -1,10 +1,19 @@
 package com.crindigo.scritsim.ui;
 
+import com.crindigo.scritsim.model.FissionReactor;
+import com.crindigo.scritsim.model.IFissionFuelStats;
+import com.crindigo.scritsim.model.components.CoolantChannel;
+import com.crindigo.scritsim.model.components.FuelRod;
 import com.crindigo.scritsim.model.components.ReactorComponent;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SimulatorUI extends JFrame
 {
@@ -20,7 +29,9 @@ public class SimulatorUI extends JFrame
 
     GridLayout paletteLayout = new GridLayout(0, 3);
     JPanel palettePanel = new JPanel();
+    JLabel simulatorResults = new JLabel("");
 
+    int reactorDepth = 1;
     ComponentPalette.Paint currentPaint = null;
 
     public SimulatorUI(String name) {
@@ -169,11 +180,118 @@ public class SimulatorUI extends JFrame
 
         applyButton.addActionListener(e -> {
             String diameter = (String) sizeComboBox.getSelectedItem();
+            String depth = (String) depthComboBox.getSelectedItem();
+            reactorDepth = Integer.parseInt(depth);
             updateReactorLayout(Integer.parseInt(diameter));
         });
         pane.add(controls, BorderLayout.LINE_START);
         pane.add(reactorComponents, BorderLayout.CENTER);
+
+        JPanel simulateControls = new JPanel();
+        Border padding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
+        simulateControls.setBorder(padding);
+        simulateControls.setLayout(new BoxLayout(simulateControls, BoxLayout.Y_AXIS));
+
+        JButton simulateButton = new JButton("Simulate");
+        simulateButton.setPreferredSize(new Dimension(180, 30));
+        simulateButton.addActionListener(this::simulateButtonClicked);
+        simulateControls.add(simulateButton);
+        simulateControls.add(simulatorResults);
+
+        pane.add(simulateControls, BorderLayout.LINE_END);
         updateReactorLayout(3);
+    }
+
+    private void simulateButtonClicked(ActionEvent e) {
+        int diameter = reactorCanvas.length;
+        FissionReactor fr = new FissionReactor(diameter, reactorDepth, 0.5);
+
+        List<FuelRod> fuelRods = new ArrayList<>();
+        List<CoolantChannel> coolantChannels = new ArrayList<>();
+        for ( int y = 0; y < diameter; y++ ) {
+            for ( int x = 0; x < diameter; x++ ) {
+                if ( reactorCanvas[x][y] == null || reactorCanvas[x][y].componentSupplier == null ) {
+                    continue;
+                }
+
+                ReactorComponent component = reactorCanvas[x][y].componentSupplier.get();
+                fr.addComponent(component, x, y);
+                if ( component instanceof FuelRod rod ) {
+                    fuelRods.add(rod);
+                }
+                if ( component instanceof CoolantChannel channel ) {
+                    coolantChannels.add(channel);
+                }
+            }
+        }
+
+        fr.prepareThermalProperties();
+        fr.computeGeometry();
+
+        // Track all types of consumed fuel and generated hot coolant
+        Map<String, Integer> consumedFuel = new HashMap<>();
+        Map<String, Integer> generatedCoolant = new HashMap<>();
+        Map<String, Integer> generatedCoolantWarmedUp = new HashMap<>();
+        int steps;
+        for ( steps = 0; steps < 3600*6; steps++ ) {
+            // scrit checks fuel depletion before updating state
+            for (FuelRod fuelRod : fuelRods) {
+                if (fuelRod.isDepleted(fr.fuelDepletion)) {
+                    fuelRod.markUndepleted();
+                    String fuelType = fuelRod.getFuel().getId();
+                    consumedFuel.compute(fuelType, (k, v) -> (v == null) ? 1 : (v + 1));
+                }
+            }
+
+            fr.updatePower();
+            fr.updateTemperature();
+
+            // this updates in updateTemperature so calculate it right after
+            for (CoolantChannel cc : coolantChannels) {
+                final String hotCoolant = cc.getCoolant().getHotCoolant().getName();
+                final int liters = cc.getGeneratedHotCoolant();
+                generatedCoolant.compute(hotCoolant, (k, v) -> (v == null) ? liters : (v + liters));
+
+                // Track coolant for the latest hour of runtime when we know it's warmed up
+                if ( steps >= 3600 * 5 ) {
+                    generatedCoolantWarmedUp.compute(hotCoolant,
+                            (k, v) -> (v == null) ? liters : (v + liters));
+                }
+            }
+
+            fr.updatePressure();
+            fr.updateNeutronPoisoning();
+            fr.regulateControlRods();
+
+            if ( fr.checkForMeltdown() ) {
+                updateResults("Melted down after " + steps + " seconds");
+                return;
+            }
+            if ( fr.checkForExplosion() ) {
+                updateResults("Exploded after " + steps + " seconds");
+                return;
+            }
+
+            //if (i % 100 == 0) {
+            //    System.out.printf("%d | Keff = %.5f, Ctrl = %.4f, Pwr: %.2f/%.2f, Temp: %.2f, Pr: %.0f/%.0f, Dep: %.2f\n",
+            //            i, fr.kEff, fr.controlRodInsertion, fr.power, fr.maxPower, fr.temperature,
+            //            fr.pressure, fr.maxPressure, fr.fuelDepletion);
+            //}
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Steps ran: ").append(steps).append("<br>");
+        consumedFuel.forEach((k, v) -> {
+            builder.append(k).append(" consumed: ").append(v).append("<br>");
+        });
+        generatedCoolantWarmedUp.forEach((k, v) -> {
+            builder.append(k).append(" generated: ").append(v / 3600).append(" L/s<br>");
+        });
+        updateResults(builder.toString());
+    }
+
+    private void updateResults(String results) {
+        simulatorResults.setText("<html><b>Results:</b><br>" + results);
     }
 
     private static void createAndShowGUI() {

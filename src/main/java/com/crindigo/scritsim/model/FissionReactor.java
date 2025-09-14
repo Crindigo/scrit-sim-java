@@ -589,6 +589,8 @@ public class FissionReactor {
                 //System.out.println("coolant flow: " + actualFlowRate);
                 channel.getInputHandler().getFluidTank().drain(actualFlowRate, true);
                 channel.getOutputHandler().getFluidTank().fill(HPCoolant, true);
+                channel.setGeneratedHotCoolant(actualFlowRate);
+
                 if (prop.accumulatesHydrogen() &&
                         this.temperature > zircaloyHydrogenReactionTemperature) {
                     double boilingPoint = coolantBoilingPoint(prop);
