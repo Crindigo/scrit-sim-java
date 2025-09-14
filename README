@@ -1,3 +1,14 @@
 WIP simulation of reactors from the Supercritical Minecraft mod.
 
 Majority of reactor code copied from https://github.com/SymmetricDevs/Supercritical
+
+## Misc Commands
+
+Upscaled textures to 32x32 with
+`convert fuel_rod_16x.png -filter Point -resize 200% fuel_rod_32x.png`
+
+Tinting fuel rods done with
+`convert fuel_rod_base.png -fill '#1d2618' -tint 70 fuel_rod_leu235_dioxide.png`
+
+Coolants just colored squares with
+`convert -size 32x32 -fill '#4a94ff' coolant_distilled.png`
