@@ -1,15 +1,15 @@
 package com.crindigo.scritsim.model;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ModeratorRegistry {
 
-    private static final Map<ModeratorInfo, IModeratorStats> MODERATORS = new Object2ObjectOpenHashMap<>();
+    private static final Map<ModeratorInfo, IModeratorStats> MODERATORS = new HashMap<>();
 
     public static void registerModerator(@NotNull ItemStack stack, @NotNull IModeratorStats moderator) {
         String registry = stack.getId();

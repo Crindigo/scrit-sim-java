@@ -1,16 +1,16 @@
 package com.crindigo.scritsim.model;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public class CoolantRegistry {
 
-    private static final Map<Fluid, ICoolantStats> COOLANTS = new Object2ObjectOpenHashMap<>();
-    private static final Map<ICoolantStats, Fluid> COOLANTS_INVERSE = new Object2ObjectOpenHashMap<>();
+    private static final Map<Fluid, ICoolantStats> COOLANTS = new HashMap<>();
+    private static final Map<ICoolantStats, Fluid> COOLANTS_INVERSE = new HashMap<>();
 
     public static void registerCoolant(@NotNull Fluid fluid, @NotNull ICoolantStats coolant) {
         COOLANTS.put(fluid, coolant);
