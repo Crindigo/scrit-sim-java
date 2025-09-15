@@ -106,7 +106,7 @@ public class Data
         public static final Fluid distilledWater = new Fluid("distilled_water", 293);
         public static final Fluid highPressureSteam = new Fluid("high_pressure_steam", 500);
         public static final Fluid boilingWater = new Fluid("boiling_water", 548);
-        public static final Fluid highPressureWetSteam = new Fluid("boiling_water", 558);
+        public static final Fluid highPressureWetSteam = new Fluid("high_pressure_wet_steam", 558);
         public static final Fluid pressurizedWater = new Fluid("pressurized_water", 548);
         public static final Fluid hotPressurizedWater = new Fluid("hot_pressurized_water", 588);
         public static final Fluid pressurizedHeavyWater = new Fluid("pressurized_heavy_water", 548);
