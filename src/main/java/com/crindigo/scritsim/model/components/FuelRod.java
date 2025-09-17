@@ -5,6 +5,8 @@ import com.crindigo.scritsim.model.ItemStack;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 public class FuelRod extends ReactorComponent {
 
     @Getter
@@ -18,6 +20,9 @@ public class FuelRod extends ReactorComponent {
     private double thermalProportion;
 
     private double depletionPoint;
+
+    @Getter
+    private int fuelUsed;
 
     public FuelRod(double maxTemperature, double thermalConductivity, IFissionFuelStats fuel, double mass) {
         super(0, maxTemperature, thermalConductivity, mass, true);
@@ -56,5 +61,19 @@ public class FuelRod extends ReactorComponent {
                 "weight=" + weight +
                 ", thermalProportion=" + thermalProportion +
                 '}';
+    }
+
+    @Override
+    public List<String> info() {
+        List<String> details = super.info();
+        details.addFirst("<b>" + fuel.getId() + "</b>");
+        details.add(String.format("Weight: %.6f", weight));
+        details.add(String.format("Thermal Proportion: %.6f", thermalProportion));
+        details.add("Fuel Consumed: " + fuelUsed);
+        return details;
+    }
+
+    public void consume() {
+        fuelUsed++;
     }
 }

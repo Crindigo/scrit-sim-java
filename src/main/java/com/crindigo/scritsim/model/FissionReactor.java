@@ -742,6 +742,13 @@ public class FissionReactor {
         reactorLayout[x][y] = component;
     }
 
+    public ReactorComponent getComponent(int x, int y) {
+        if ( x < 0 || x >= reactorLayout.length || y < 0 || y >= reactorLayout.length ) {
+            return null;
+        }
+        return reactorLayout[x][y];
+    }
+
     public void updateControlRodInsertion(double controlRodInsertion) {
         this.controlRodInsertion = Math.max(0.001, controlRodInsertion);
         this.controlRodFactor = ControlRod.controlRodFactor(effectiveControlRods, this.controlRodInsertion);

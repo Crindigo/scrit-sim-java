@@ -82,4 +82,12 @@ public class ControlRod extends ReactorComponent {
     public void computeWeightFromFuelRodMap() {
         this.weight = relatedFuelRodPairs * 4; // 4 being a constant to help balance this out
     }
+
+    @Override
+    public List<String> info() {
+        List<String> details = super.info();
+        details.add(String.format("Weight: %.6f", weight));
+        details.add("Fuel Rod Pairs: " + relatedFuelRodPairs);
+        return details;
+    }
 }

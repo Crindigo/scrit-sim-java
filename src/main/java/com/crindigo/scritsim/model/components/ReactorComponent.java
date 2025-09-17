@@ -3,6 +3,9 @@ package com.crindigo.scritsim.model.components;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 public class ReactorComponent {
 
@@ -46,5 +49,14 @@ public class ReactorComponent {
     public double getDistance(ReactorComponent component) {
         return Math.sqrt(Math.pow(this.getX() - component.getX(), 2) +
                 Math.pow(this.getY() - component.getY(), 2));
+    }
+
+    public List<String> info() {
+        List<String> info = new ArrayList<>();
+        info.add("Moderation Factor: " + moderationFactor);
+        info.add("Max Temp: " + maxTemperature);
+        info.add("Thermal Conductivity: " + thermalConductivity);
+        info.add("Mass: " + mass);
+        return info;
     }
 }

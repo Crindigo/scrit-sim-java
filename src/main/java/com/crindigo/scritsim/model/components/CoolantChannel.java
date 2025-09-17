@@ -25,6 +25,10 @@ public class CoolantChannel extends ReactorComponent {
     @Getter
     private int generatedHotCoolant;
 
+    @Setter
+    @Getter
+    private int lastHourCoolantGenerated = 0;
+
     // Allows fission reactors to heat up less than a full liter of coolant.
     public double partialCoolant;
 
@@ -51,5 +55,14 @@ public class CoolantChannel extends ReactorComponent {
         return "CoolantChannel{" +
                 "weight=" + weight +
                 '}';
+    }
+
+    @Override
+    public List<String> info() {
+        List<String> details = super.info();
+        details.addFirst("<b>" + coolant.getCoolant().getName() + "</b>");
+        details.add(String.format("Weight: %.6f", weight));
+        details.add(String.format("Coolant Generation: %.2f L/s", lastHourCoolantGenerated / 3600f));
+        return details;
     }
 }

@@ -10,6 +10,9 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,13 +33,17 @@ public class SimulatorUI extends JFrame
     GridLayout paletteLayout = new GridLayout(0, 3);
     JPanel palettePanel = new JPanel();
     JLabel simulatorResults = new JLabel("");
+    JLabel componentDetails = new JLabel("");
 
     int reactorDepth = 1;
     ComponentPalette.Paint currentPaint = null;
+    ComponentHoverListener hoverListener;
+    FissionReactor reactor;
 
     public SimulatorUI(String name) {
         super(name);
         setResizable(true);
+        hoverListener = new ComponentHoverListener();
     }
 
     public void initDropdowns() {
@@ -85,6 +92,7 @@ public class SimulatorUI extends JFrame
                     b.setMinimumSize(square);
                     b.setActionCommand(x + "," + y); // Y=0 is at bottom
                     b.addActionListener(this::reactorButtonClicked);
+                    b.addMouseListener(hoverListener);
                     updateButton(b, x, y, reactorCanvas[x][y]);
                     reactorComponents.add(b);
                 } else {
@@ -97,6 +105,35 @@ public class SimulatorUI extends JFrame
         reactorComponents.revalidate();
         reactorComponents.repaint();
         this.pack();
+    }
+
+    private class ComponentHoverListener extends MouseAdapter {
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            if ( reactor == null ) {
+                componentDetails.setText("");
+                return;
+            }
+
+            String[] xy = ((JButton) e.getSource()).getActionCommand().split(",");
+            int x = Integer.parseInt(xy[0]);
+            int y = Integer.parseInt(xy[1]);
+            // show some info on the bottom right or else we just use tooltips, would have to
+            // save all the JButton instances
+            ReactorComponent component = reactor.getComponent(x, y);
+            if ( component != null ) {
+                String info = component.info().stream().reduce("<html>",
+                        (result, item) -> result + item + "<br>");
+                componentDetails.setText(info);
+            } else {
+                componentDetails.setText("");
+            }
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            componentDetails.setText("");
+        }
     }
 
     private void resizeCanvas(int diameter) {
@@ -197,6 +234,10 @@ public class SimulatorUI extends JFrame
         simulateButton.addActionListener(this::simulateButtonClicked);
         simulateControls.add(simulateButton);
         simulateControls.add(simulatorResults);
+        JSeparator sep = new JSeparator();
+        sep.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        simulateControls.add(sep);
+        simulateControls.add(componentDetails);
 
         pane.add(simulateControls, BorderLayout.LINE_END);
         updateReactorLayout(3);
@@ -205,6 +246,7 @@ public class SimulatorUI extends JFrame
     private void simulateButtonClicked(ActionEvent e) {
         int diameter = reactorCanvas.length;
         FissionReactor fr = new FissionReactor(diameter, reactorDepth, 0.5);
+        this.reactor = fr;
 
         List<FuelRod> fuelRods = new ArrayList<>();
         List<CoolantChannel> coolantChannels = new ArrayList<>();
@@ -238,6 +280,7 @@ public class SimulatorUI extends JFrame
             for (FuelRod fuelRod : fuelRods) {
                 if (fuelRod.isDepleted(fr.fuelDepletion)) {
                     fuelRod.markUndepleted();
+                    fuelRod.consume();
                     String fuelType = fuelRod.getFuel().getId();
                     consumedFuel.compute(fuelType, (k, v) -> (v == null) ? 1 : (v + 1));
                 }
@@ -256,6 +299,8 @@ public class SimulatorUI extends JFrame
                 if ( steps >= 3600 * 5 ) {
                     generatedCoolantWarmedUp.compute(hotCoolant,
                             (k, v) -> (v == null) ? liters : (v + liters));
+
+                    cc.setLastHourCoolantGenerated(cc.getLastHourCoolantGenerated() + liters);
                 }
             }
 

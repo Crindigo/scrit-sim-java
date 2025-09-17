@@ -3,6 +3,8 @@ package com.crindigo.scritsim.model;
 
 public interface ICoolantStats {
 
+    Fluid getCoolant();
+
     /**
      * @return The heated coolant fluid.
      */
