@@ -8,11 +8,16 @@ import com.crindigo.scritsim.model.components.ReactorComponent;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -229,15 +234,77 @@ public class SimulatorUI extends JFrame
         simulateControls.setBorder(padding);
         simulateControls.setLayout(new BoxLayout(simulateControls, BoxLayout.Y_AXIS));
 
-        JButton simulateButton = new JButton("Simulate");
-        simulateButton.setPreferredSize(new Dimension(180, 30));
+        var loadButton = new JButton("Load");
+        var saveButton = new JButton("Save");
+
+        loadButton.addActionListener(e -> {
+            var fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("scdesign files", "scdesign"));
+            var ok = fileChooser.showOpenDialog(null);
+            if ( ok == JFileChooser.APPROVE_OPTION ) {
+                var f = fileChooser.getSelectedFile();
+                try {
+                    var designString = Files.readString(f.toPath());
+                    var design = ReactorSaveHandler.loadDesign(designString);
+                    reactorCanvas = design.canvas;
+                    reactorDepth = design.depth;
+                    sizeComboBox.setSelectedItem("" + reactorCanvas.length);
+                    depthComboBox.setSelectedItem("" + reactorDepth);
+                    updateReactorLayout(reactorCanvas.length);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (ReactorSaveHandler.DesignParseException ex) {
+                    var dialog = new JDialog(SimulatorUI.this);
+                    dialog.getContentPane().add(new JLabel(ex.getMessage()));
+                    dialog.setVisible(true);
+                }
+            }
+        });
+
+        saveButton.addActionListener(e -> {
+            var fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("scdesign files", "scdesign"));
+            var ok = fileChooser.showSaveDialog(null);
+            if ( ok == JFileChooser.APPROVE_OPTION ) {
+                var f = fileChooser.getSelectedFile();
+                if ( !f.getName().endsWith("." + ReactorSaveHandler.EXTENSION) ) {
+                    f = new File(f.getParentFile(), f.getName() + "." + ReactorSaveHandler.EXTENSION);
+                    var design = ReactorSaveHandler.saveDesign(new ReactorSaveHandler.Design(reactorDepth, reactorCanvas));
+                    try {
+                        Files.writeString(f.toPath(), design);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+
+        var topRight = new JPanel();
+        topRight.setPreferredSize(new Dimension(250, 400));
+        //topRight.setMaximumSize(new Dimension(400, 400));
+        topRight.setLayout(null);
+        topRight.add(loadButton);
+        topRight.add(saveButton);
+        var simulateButton = new JButton("Simulate");
         simulateButton.addActionListener(this::simulateButtonClicked);
-        simulateControls.add(simulateButton);
-        simulateControls.add(simulatorResults);
-        JSeparator sep = new JSeparator();
-        sep.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        simulateControls.add(sep);
-        simulateControls.add(componentDetails);
+        topRight.add(simulateButton);
+        topRight.add(simulatorResults);
+        topRight.add(componentDetails);
+
+        loadButton.setBounds(0, 0, 80, 30);
+        saveButton.setBounds(100, 0, 80, 30);
+        simulateButton.setBounds(0, 40, 180, 30);
+        simulatorResults.setVerticalAlignment(SwingConstants.TOP);
+        simulatorResults.setBounds(0, 80, 250, 150);
+        componentDetails.setVerticalAlignment(SwingConstants.BOTTOM);
+        componentDetails.setBounds(0, 200, 250, 200);
+
+        simulateControls.add(topRight);
+
+        //JSeparator sep = new JSeparator();
+        //sep.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        //simulateControls.add(sep);
+        //simulateControls.add(componentDetails);
 
         pane.add(simulateControls, BorderLayout.LINE_END);
         updateReactorLayout(3);

@@ -8,7 +8,9 @@ import com.crindigo.scritsim.model.ModeratorProperty;
 import com.crindigo.scritsim.model.components.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class ComponentPalette
@@ -20,27 +22,31 @@ public class ComponentPalette
 
     public static Paint empty = new Paint(null, "", "Empty");
 
+    public static Map<String, Paint> idToPaint = new HashMap<>();
+
     public static void init()
     {
-        fuels.add(new Paint(makeFuelRod(Data.Fuels.leu235), "fuel_rod_leu235.png", "LEU-235"));
-        fuels.add(new Paint(makeFuelRod(Data.Fuels.heu235), "fuel_rod_heu235.png", "HEU-235"));
-        fuels.add(new Paint(makeFuelRod(Data.Fuels.lowGradeMox), "fuel_rod_mox_low.png", "Low-Grade MOX"));
-        fuels.add(new Paint(makeFuelRod(Data.Fuels.highGradeMox), "fuel_rod_mox_high.png", "High-Grade MOX"));
-        fuels.add(new Paint(makeFuelRod(Data.Fuels.leu235Dioxide), "fuel_rod_leu235_dioxide.png", "LEU-235 Dioxide"));
-        fuels.add(new Paint(makeFuelRod(Data.Fuels.haleu235Dioxide), "fuel_rod_haleu235_dioxide.png", "HALEU-235 Dioxide"));
-        fuels.add(new Paint(makeFuelRod(Data.Fuels.heu235Dioxide), "fuel_rod_heu235_dioxide.png", "HEU-235 Dioxide"));
-        fuels.add(new Paint(makeFuelRod(Data.Fuels.mixedOxide), "fuel_rod_mox_susy.png", "Mixed Oxide"));
+        fuels.add(new Paint(makeFuelRod(Data.Fuels.leu235), "fuel_rod_leu235", "LEU-235"));
+        fuels.add(new Paint(makeFuelRod(Data.Fuels.heu235), "fuel_rod_heu235", "HEU-235"));
+        fuels.add(new Paint(makeFuelRod(Data.Fuels.lowGradeMox), "fuel_rod_mox_low", "Low-Grade MOX"));
+        fuels.add(new Paint(makeFuelRod(Data.Fuels.highGradeMox), "fuel_rod_mox_high", "High-Grade MOX"));
+        fuels.add(new Paint(makeFuelRod(Data.Fuels.leu235Dioxide), "fuel_rod_leu235_dioxide", "LEU-235 Dioxide"));
+        fuels.add(new Paint(makeFuelRod(Data.Fuels.haleu235Dioxide), "fuel_rod_haleu235_dioxide", "HALEU-235 Dioxide"));
+        fuels.add(new Paint(makeFuelRod(Data.Fuels.heu235Dioxide), "fuel_rod_heu235_dioxide", "HEU-235 Dioxide"));
+        fuels.add(new Paint(makeFuelRod(Data.Fuels.mixedOxide), "fuel_rod_mox_susy", "Mixed Oxide"));
 
-        coolants.add(new Paint(makeCoolant(Data.Coolants.distilledWaterCoolant), "coolant_distilled.png", "Distilled Water"));
-        coolants.add(new Paint(makeCoolant(Data.Coolants.boilingWaterCoolant), "coolant_boiling.png", "Boiling Water"));
-        coolants.add(new Paint(makeCoolant(Data.Coolants.pressurizedWaterCoolant), "coolant_pressurized.png", "Pressurized Water"));
-        coolants.add(new Paint(makeCoolant(Data.Coolants.pressurizedHeavyWaterCoolant), "coolant_pressurized_heavy.png", "Pressurized Heavy Water"));
+        coolants.add(new Paint(makeCoolant(Data.Coolants.distilledWaterCoolant), "coolant_distilled", "Distilled Water"));
+        coolants.add(new Paint(makeCoolant(Data.Coolants.boilingWaterCoolant), "coolant_boiling", "Boiling Water"));
+        coolants.add(new Paint(makeCoolant(Data.Coolants.pressurizedWaterCoolant), "coolant_pressurized", "Pressurized Water"));
+        coolants.add(new Paint(makeCoolant(Data.Coolants.pressurizedHeavyWaterCoolant), "coolant_pressurized_heavy", "Pressurized Heavy Water"));
 
-        moderators.add(new Paint(makeModerator(Data.Moderators.graphiteModerator), "moderator_graphite.png", "Graphite Moderator"));
-        moderators.add(new Paint(makeModerator(Data.Moderators.berylliumModerator), "moderator_beryllium.png", "Beryllium Moderator"));
+        moderators.add(new Paint(makeModerator(Data.Moderators.graphiteModerator), "moderator_graphite", "Graphite Moderator"));
+        moderators.add(new Paint(makeModerator(Data.Moderators.berylliumModerator), "moderator_beryllium", "Beryllium Moderator"));
 
-        controls.add(new Paint(makeControl(false), "control_rod.png", "Normal Control Rod"));
-        controls.add(new Paint(makeControl(true), "control_rod_moderated.png", "Graphite-Tipped Control Rod"));
+        controls.add(new Paint(makeControl(false), "control_rod", "Normal Control Rod"));
+        controls.add(new Paint(makeControl(true), "control_rod_moderated", "Graphite-Tipped Control Rod"));
+
+        allPaints().forEach(paint -> idToPaint.put(paint.id, paint));
     }
 
     public static List<Paint> allPaints()
@@ -55,12 +61,14 @@ public class ComponentPalette
 
     public static class Paint {
         public Supplier<ReactorComponent> componentSupplier;
+        public String id;
         public String image;
         public String name;
 
-        public Paint(Supplier<ReactorComponent> componentSupplier, String image, String name) {
+        public Paint(Supplier<ReactorComponent> componentSupplier, String id, String name) {
             this.componentSupplier = componentSupplier;
-            this.image = image;
+            this.id = id;
+            this.image = id.isEmpty() ? "" : id + ".png";
             this.name = name;
         }
     }
