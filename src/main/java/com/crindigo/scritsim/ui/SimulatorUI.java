@@ -254,9 +254,10 @@ public class SimulatorUI extends JFrame
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 } catch (ReactorSaveHandler.DesignParseException ex) {
-                    var dialog = new JDialog(SimulatorUI.this);
-                    dialog.getContentPane().add(new JLabel(ex.getMessage()));
-                    dialog.setVisible(true);
+                    JOptionPane.showMessageDialog(this,
+                            ex.getMessage(),
+                            "Import Error",
+                            JOptionPane.WARNING_MESSAGE);
                 }
             }
         });

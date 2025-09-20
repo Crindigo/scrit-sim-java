@@ -23,7 +23,7 @@ public class ReactorSaveHandler
         b.append(canvas.length).append(' ').append(design.depth).append('\n');
         for ( int x = 0; x < canvas.length; x++ ) {
             for ( int y = 0; y < canvas[x].length; y++ ) {
-                if ( canvas[x][y] == null ) {
+                if ( canvas[x][y] == null || canvas[x][y].id.isEmpty() ) {
                     continue;
                 }
                 b.append(x).append(' ').append(y).append(' ').append(canvas[x][y].id).append('\n');
@@ -55,6 +55,18 @@ public class ReactorSaveHandler
                     System.err.println("Skipping coordinate outside bounds");
                     continue;
                 }
+
+                if ( scanner.hasNextInt() ) {
+                    // workaround for a bug: it shouldn't have been adding empty to the file.
+                    // so we just check if the next item is a number because the component is blank.
+                    continue;
+                }
+
+                if ( !scanner.hasNext() ) {
+                    // related to the above if empty is the final component
+                    break;
+                }
+
                 var componentId = scanner.next();
                 canvas[x][y] = ComponentPalette.idToPaint.get(componentId);
             }
