@@ -99,6 +99,14 @@ public class Data
                         .releasedHeatEnergy(0.02)
                         .decayRate(0.1)
                         .build();
+
+        public static final FissionFuelProperty bismuth =
+                FissionFuelProperty.builder("bismuth", 560, 5000, 5)
+                        .slowNeutronCaptureCrossSection(0.2)
+                        .requiredNeutrons(1)
+                        .releasedNeutrons(0)
+                        .releasedHeatEnergy(0.005)
+                        .build();
     }
 
     public static class Fluids
