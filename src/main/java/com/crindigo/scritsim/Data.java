@@ -13,7 +13,7 @@ public class Data
                         .slowNeutronFissionCrossSection(1.8)
                         .requiredNeutrons(1)
                         .releasedNeutrons(2.5)
-                        .releasedHeatEnergy(0.01)
+                        .releasedHeatEnergy(0.025)
                         .decayRate(0.025)
                         .build();
 
@@ -24,7 +24,7 @@ public class Data
                         .slowNeutronFissionCrossSection(2)
                         .requiredNeutrons(1)
                         .releasedNeutrons(2.5)
-                        .releasedHeatEnergy(0.01)
+                        .releasedHeatEnergy(0.025)
                         .decayRate(0.05)
                         .build();
 
@@ -35,7 +35,7 @@ public class Data
                         .slowNeutronFissionCrossSection(2.2)
                         .requiredNeutrons(1)
                         .releasedNeutrons(2.60)
-                        .releasedHeatEnergy(0.02)
+                        .releasedHeatEnergy(0.052)
                         .decayRate(0.1)
                         .build();
 
@@ -46,7 +46,7 @@ public class Data
                         .slowNeutronFissionCrossSection(2.4)
                         .requiredNeutrons(1)
                         .releasedNeutrons(2.80)
-                        .releasedHeatEnergy(0.02)
+                        .releasedHeatEnergy(0.056)
                         .decayRate(0.2)
                         .build();
 
@@ -60,7 +60,7 @@ public class Data
                         .slowNeutronFissionCrossSection(1.8)
                         .requiredNeutrons(1)
                         .releasedNeutrons(2.5)
-                        .releasedHeatEnergy(0.01)
+                        .releasedHeatEnergy(0.025)
                         .decayRate(0.025)
                         .build();
 
@@ -72,7 +72,7 @@ public class Data
                         .slowNeutronFissionCrossSection(1.9)
                         .requiredNeutrons(1)
                         .releasedNeutrons(2.5)
-                        .releasedHeatEnergy(0.01)
+                        .releasedHeatEnergy(0.025)
                         .decayRate(0.025)
                         .build();
 
@@ -84,7 +84,7 @@ public class Data
                         .slowNeutronFissionCrossSection(2)
                         .requiredNeutrons(1)
                         .releasedNeutrons(2.5)
-                        .releasedHeatEnergy(0.01)
+                        .releasedHeatEnergy(0.025)
                         .decayRate(0.05)
                         .build();
 
@@ -96,7 +96,7 @@ public class Data
                         .slowNeutronFissionCrossSection(2.2)
                         .requiredNeutrons(1)
                         .releasedNeutrons(2.60)
-                        .releasedHeatEnergy(0.02)
+                        .releasedHeatEnergy(0.052)
                         .decayRate(0.1)
                         .build();
 

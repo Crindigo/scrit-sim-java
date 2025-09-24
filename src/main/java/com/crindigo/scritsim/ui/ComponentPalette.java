@@ -34,7 +34,7 @@ public class ComponentPalette
         fuels.add(new Paint(makeFuelRod(Data.Fuels.haleu235Dioxide), "fuel_rod_haleu235_dioxide", "HALEU-235 Dioxide"));
         fuels.add(new Paint(makeFuelRod(Data.Fuels.heu235Dioxide), "fuel_rod_heu235_dioxide", "HEU-235 Dioxide"));
         fuels.add(new Paint(makeFuelRod(Data.Fuels.mixedOxide), "fuel_rod_mox_susy", "Mixed Oxide"));
-        fuels.add(new Paint(makeFuelRod(Data.Fuels.bismuth), "fuel_rod_bismuth", "Bismuth (BROKEN!)"));
+        fuels.add(new Paint(makeFuelRod(Data.Fuels.bismuth), "fuel_rod_bismuth", "Bismuth"));
 
         coolants.add(new Paint(makeCoolant(Data.Coolants.distilledWaterCoolant), "coolant_distilled", "Distilled Water"));
         coolants.add(new Paint(makeCoolant(Data.Coolants.boilingWaterCoolant), "coolant_boiling", "Boiling Water"));
