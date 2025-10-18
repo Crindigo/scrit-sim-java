@@ -1,6 +1,7 @@
 package com.crindigo.scritsim.model.components;
 
 import com.crindigo.scritsim.model.CoolantHandler;
+import com.crindigo.scritsim.model.FissionReactor;
 import com.crindigo.scritsim.model.ICoolantStats;
 import lombok.Getter;
 import lombok.Setter;
@@ -58,8 +59,8 @@ public class CoolantChannel extends ReactorComponent {
     }
 
     @Override
-    public List<String> info() {
-        List<String> details = super.info();
+    public List<String> info(FissionReactor reactor) {
+        List<String> details = super.info(reactor);
         details.addFirst("<b>" + coolant.getCoolant().getName() + "</b>");
         details.add(String.format("Weight: %.6f", weight));
         details.add(String.format("Coolant Generation: %.2f L/s", lastHourCoolantGenerated / 3600f));

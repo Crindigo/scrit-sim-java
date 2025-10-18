@@ -1,5 +1,6 @@
 package com.crindigo.scritsim.model.components;
 
+import com.crindigo.scritsim.model.FissionReactor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -51,7 +52,7 @@ public class ReactorComponent {
                 Math.pow(this.getY() - component.getY(), 2));
     }
 
-    public List<String> info() {
+    public List<String> info(FissionReactor reactor) {
         List<String> info = new ArrayList<>();
         info.add("Moderation Factor: " + moderationFactor);
         info.add("Max Temp: " + maxTemperature);

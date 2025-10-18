@@ -1,5 +1,6 @@
 package com.crindigo.scritsim.model.components;
 
+import com.crindigo.scritsim.model.FissionReactor;
 import com.crindigo.scritsim.model.IFissionFuelStats;
 import com.crindigo.scritsim.model.ItemStack;
 import lombok.Getter;
@@ -72,12 +73,12 @@ public class FuelRod extends ReactorComponent {
     }
 
     @Override
-    public List<String> info() {
-        List<String> details = super.info();
+    public List<String> info(FissionReactor reactor) {
+        List<String> details = super.info(reactor);
         details.addFirst("<b>" + fuel.getId() + "</b>");
         details.add(String.format("Weight: %.6f", weight));
         details.add(String.format("Thermal Proportion: %.6f", thermalProportion));
-        details.add("Fuel Consumed: " + fuelUsed);
+        details.add("Fuel Consumed: " + String.format("%.6f", fuelUsed + depletionPercent(reactor.fuelDepletion)));
         return details;
     }
 

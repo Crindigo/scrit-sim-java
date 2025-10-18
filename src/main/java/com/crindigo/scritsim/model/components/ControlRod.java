@@ -1,5 +1,6 @@
 package com.crindigo.scritsim.model.components;
 
+import com.crindigo.scritsim.model.FissionReactor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -84,8 +85,8 @@ public class ControlRod extends ReactorComponent {
     }
 
     @Override
-    public List<String> info() {
-        List<String> details = super.info();
+    public List<String> info(FissionReactor reactor) {
+        List<String> details = super.info(reactor);
         details.add(String.format("Weight: %.6f", weight));
         details.add("Fuel Rod Pairs: " + relatedFuelRodPairs);
         return details;

@@ -123,7 +123,7 @@ public class SimulatorUI extends JFrame
             // save all the JButton instances
             ReactorComponent component = reactor.getComponent(x, y);
             if ( component != null ) {
-                String info = component.info().stream().reduce("<html>",
+                String info = component.info(reactor).stream().reduce("<html>",
                         (result, item) -> result + item + "<br>");
                 componentDetails.setText(info);
             } else {
