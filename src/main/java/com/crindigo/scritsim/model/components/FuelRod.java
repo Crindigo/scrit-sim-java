@@ -51,6 +51,14 @@ public class FuelRod extends ReactorComponent {
         return this.depletionPoint <= totalDepletion * weight;
     }
 
+    public double depletionPercent(double totalDepletion) {
+        // interp between previous and current depletion thresholds
+        var previous = depletionPoint - fuel.getDuration();
+        var rodDepletion = totalDepletion * weight;
+        var percent = (rodDepletion - previous) / fuel.getDuration();
+        return Math.min(1.0, Math.max(0.0, percent));
+    }
+
     public void markUndepleted() {
         this.depletionPoint += fuel.getDuration();
     }

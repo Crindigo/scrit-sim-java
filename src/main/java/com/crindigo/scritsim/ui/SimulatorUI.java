@@ -1,7 +1,6 @@
 package com.crindigo.scritsim.ui;
 
 import com.crindigo.scritsim.model.FissionReactor;
-import com.crindigo.scritsim.model.IFissionFuelStats;
 import com.crindigo.scritsim.model.components.CoolantChannel;
 import com.crindigo.scritsim.model.components.FuelRod;
 import com.crindigo.scritsim.model.components.ReactorComponent;
@@ -13,18 +12,15 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class SimulatorUI extends JFrame
 {
+    static boolean ioControl = false;
     static final String[] sizeOptions = {"3", "5", "7", "9", "11", "13"};
     static final String[] depthOptions = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"};
     JComboBox<String> sizeComboBox;
@@ -246,11 +242,7 @@ public class SimulatorUI extends JFrame
                 try {
                     var designString = Files.readString(f.toPath());
                     var design = ReactorSaveHandler.loadDesign(designString);
-                    reactorCanvas = design.canvas;
-                    reactorDepth = design.depth;
-                    sizeComboBox.setSelectedItem("" + reactorCanvas.length);
-                    depthComboBox.setSelectedItem("" + reactorDepth);
-                    updateReactorLayout(reactorCanvas.length);
+                    setDesign(design, true);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 } catch (ReactorSaveHandler.DesignParseException ex) {
@@ -311,7 +303,21 @@ public class SimulatorUI extends JFrame
         updateReactorLayout(3);
     }
 
+    public void setDesign(ReactorSaveHandler.Design design, boolean updateUI) {
+        reactorCanvas = design.canvas;
+        reactorDepth = design.depth;
+        if (updateUI) {
+            sizeComboBox.setSelectedItem("" + reactorCanvas.length);
+            depthComboBox.setSelectedItem("" + reactorDepth);
+            updateReactorLayout(reactorCanvas.length);
+        }
+    }
+
     private void simulateButtonClicked(ActionEvent e) {
+        updateResults(runSimulation(21600));
+    }
+
+    public String runSimulation(int totalSteps) {
         int diameter = reactorCanvas.length;
         FissionReactor fr = new FissionReactor(diameter, reactorDepth, 0.5);
         this.reactor = fr;
@@ -339,17 +345,17 @@ public class SimulatorUI extends JFrame
         fr.computeGeometry();
 
         // Track all types of consumed fuel and generated hot coolant
-        Map<String, Integer> consumedFuel = new HashMap<>();
+        Map<String, Double> consumedFuel = new HashMap<>();
         Map<String, Integer> generatedCoolant = new HashMap<>();
         Map<String, Integer> generatedCoolantWarmedUp = new HashMap<>();
         int steps;
-        for ( steps = 0; steps < 3600*6; steps++ ) {
+        for ( steps = 0; steps < totalSteps; steps++ ) {
             // scrit checks fuel depletion before updating state
             for (FuelRod fuelRod : fuelRods) {
+                String fuelType = fuelRod.getFuel().getId();
                 if (fuelRod.isDepleted(fr.fuelDepletion)) {
                     fuelRod.markUndepleted();
                     fuelRod.consume();
-                    String fuelType = fuelRod.getFuel().getId();
                     consumedFuel.compute(fuelType, (k, v) -> (v == null) ? 1 : (v + 1));
                 }
             }
@@ -364,7 +370,7 @@ public class SimulatorUI extends JFrame
                 generatedCoolant.compute(hotCoolant, (k, v) -> (v == null) ? liters : (v + liters));
 
                 // Track coolant for the latest hour of runtime when we know it's warmed up
-                if ( steps >= 3600 * 5 ) {
+                if ( steps >= (totalSteps - 3600) ) {
                     generatedCoolantWarmedUp.compute(hotCoolant,
                             (k, v) -> (v == null) ? liters : (v + liters));
 
@@ -377,30 +383,48 @@ public class SimulatorUI extends JFrame
             fr.regulateControlRods();
 
             if ( fr.checkForMeltdown() ) {
-                updateResults("Melted down after " + steps + " seconds");
-                return;
+                return ioControl ? ("meltdown " + steps + "\n") : ("Melted down after " + steps + " seconds");
             }
             if ( fr.checkForExplosion() ) {
-                updateResults("Exploded after " + steps + " seconds");
-                return;
+                return ioControl ? ("explosion " + steps + "\n") : ("Exploded after " + steps + " seconds");
             }
 
-            //if (steps % 100 == 0) {
-                System.out.printf("%d | Keff = %.5f, Ctrl = %.4f, Pwr: %.2f/%.2f, Temp: %.2f, Pr: %.0f/%.0f, Dep: %.2f\n",
-                        steps, fr.kEff, fr.controlRodInsertion, fr.power, fr.maxPower, fr.temperature,
-                        fr.pressure, fr.maxPressure, fr.fuelDepletion);
-            //}
+//            if (steps % 100 == 0) {
+//                System.out.printf("%d | Keff = %.5f, Ctrl = %.4f, Pwr: %.2f/%.2f, Temp: %.2f, Pr: %.0f/%.0f, Dep: %.2f\n",
+//                        steps, fr.kEff, fr.controlRodInsertion, fr.power, fr.maxPower, fr.temperature,
+//                        fr.pressure, fr.maxPressure, fr.fuelDepletion);
+//            }
+        }
+
+        // Add in how much fractional fuel has been consumed on the current rods
+        for (FuelRod fuelRod : fuelRods) {
+            String fuelType = fuelRod.getFuel().getId();
+            var fraction = fuelRod.depletionPercent(fr.fuelDepletion);
+            consumedFuel.compute(fuelType, (k, v) -> (v == null) ? 0 : (v + fraction));
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append("Steps ran: ").append(steps).append("<br>");
-        consumedFuel.forEach((k, v) -> {
-            builder.append(k).append(" consumed: ").append(v).append("<br>");
-        });
-        generatedCoolantWarmedUp.forEach((k, v) -> {
-            builder.append(k).append(" generated: ").append(v / 3600).append(" L/s<br>");
-        });
-        updateResults(builder.toString());
+        if ( ioControl ) {
+            // steps 21600
+            // consume heu_235_dioxide 123
+            // generate hp_wet_steam 1000
+            //builder.append("steps ").append(steps).append('\n');
+            consumedFuel.forEach((k, v) -> {
+                builder.append("consume ").append(k).append(' ').append(v).append('\n');
+            });
+            generatedCoolantWarmedUp.forEach((k, v) -> {
+                builder.append("generate ").append(k).append(' ').append(v / 3600.).append('\n');
+            });
+        } else {
+            builder.append("Steps ran: ").append(steps).append("<br>");
+            consumedFuel.forEach((k, v) -> {
+                builder.append(k).append(" consumed: ").append(String.format("%.3f", v)).append("<br>");
+            });
+            generatedCoolantWarmedUp.forEach((k, v) -> {
+                builder.append(k).append(" generated: ").append(v / 3600).append(" L/s<br>");
+            });
+        }
+        return builder.toString();
     }
 
     private void updateResults(String results) {
@@ -416,10 +440,20 @@ public class SimulatorUI extends JFrame
         //Display the window.
         frame.pack();
         frame.setVisible(true);
+
+        if ( ioControl ) {
+            var t = new Thread(new PipeHandler(frame));
+            t.start();
+        }
     }
 
     public static void main(String[] args)
     {
+        // not really headless that will take longer
+        if (Arrays.asList(args).contains("--iocontrol")) {
+            SimulatorUI.ioControl = true;
+        }
+
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |

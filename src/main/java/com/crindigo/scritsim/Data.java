@@ -53,7 +53,7 @@ public class Data
         // Supersymmetry Fuels
 
         public static final FissionFuelProperty leu235Dioxide =
-                FissionFuelProperty.builder("leu235Dioxide", 1500, 100000, 3.5)
+                FissionFuelProperty.builder("leu235Dioxide", 1500, 22000000, 3.5)
                         .fastNeutronCaptureCrossSection(0.4)
                         .fastNeutronFissionCrossSection(0.2)
                         .slowNeutronCaptureCrossSection(1.8)
@@ -65,7 +65,7 @@ public class Data
                         .build();
 
         public static final FissionFuelProperty haleu235Dioxide =
-                FissionFuelProperty.builder("haleu235Dioxide", 1600, 200000, 3)
+                FissionFuelProperty.builder("haleu235Dioxide", 1600, 44000000, 3)
                         .fastNeutronCaptureCrossSection(0.35)
                         .fastNeutronFissionCrossSection(0.175)
                         .slowNeutronCaptureCrossSection(1.9)
@@ -77,7 +77,7 @@ public class Data
                         .build();
 
         public static final FissionFuelProperty heu235Dioxide =
-                FissionFuelProperty.builder("heu235Dioxide", 1800, 400000, 2.5)
+                FissionFuelProperty.builder("heu235Dioxide", 1800, 88000000, 2.5)
                         .fastNeutronCaptureCrossSection(0.3)
                         .fastNeutronFissionCrossSection(0.15)
                         .slowNeutronCaptureCrossSection(2)
@@ -89,7 +89,7 @@ public class Data
                         .build();
 
         public static final FissionFuelProperty mixedOxide =
-                FissionFuelProperty.builder("mixedOxide", 1600, 60000, 1.5)
+                FissionFuelProperty.builder("mixedOxide", 1600, 13200000, 1.5)
                         .fastNeutronCaptureCrossSection(0.5)
                         .fastNeutronFissionCrossSection(0.25)
                         .slowNeutronCaptureCrossSection(2.2)
