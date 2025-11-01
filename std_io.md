@@ -2,29 +2,29 @@ Version 1.2.0 adds support for communicating over standard i/o, using the --ioco
 
 The input works like the following:
 
-Send `design` to start inputting a design in the simulator's save format.
-Send `.` to finish inputting the design.
-Send `sim X` to simulate for X steps. It outputs lines for each fuel and coolant type as `consume TYPE AMT` and `generate TYPE AMT`.
-Send `q` to quit.
+- Send `design` to start inputting a design in the simulator's save format.
+- Send `.` to finish inputting the design.
+- Send `sim X` to simulate for X steps. It outputs lines for each fuel and coolant type as `consume TYPE AMT` and `generate TYPE AMT`.
+- Send `q` to quit.
 
 Save format explanation:
-Line 1: Always `scd 1` unless it needs a new version.
-Line 2: Two numbers, diameter and depth.
-Lines 3+: The X position, Y position, and component ID. Empty positions are omitted.
+- Line 1: Always `scd 1` unless it needs a new version.
+- Line 2: Two numbers, diameter and depth.
+- Lines 3+: The X position, Y position, and component ID. Empty positions are omitted.
 
 Component IDs:
-fuel_rod_leu235_dioxide
-fuel_rod_haleu235_dioxide
-fuel_rod_heu235_dioxide
-fuel_rod_mox_susy
-fuel_rod_bismuth
-coolant_boiling
-coolant_pressurized
-coolant_pressurized_heavy
-moderator_graphite
-moderator_beryllium
-control_rod
-control_rod_moderated
+- fuel_rod_leu235_dioxide
+- fuel_rod_haleu235_dioxide
+- fuel_rod_heu235_dioxide
+- fuel_rod_mox_susy
+- fuel_rod_bismuth
+- coolant_boiling
+- coolant_pressurized
+- coolant_pressurized_heavy
+- moderator_graphite
+- moderator_beryllium
+- control_rod
+- control_rod_moderated
 
 Sample session:
 ```
