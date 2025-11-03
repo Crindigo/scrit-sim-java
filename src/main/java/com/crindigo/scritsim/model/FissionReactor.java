@@ -759,44 +759,35 @@ public class FissionReactor {
             return;
 
         boolean adjustFactor = false;
-        if ( temperature > maxTemperature - 250 ) {
-            // SECTION ADDED FOR TESTING
-            // Update insertion regardless of kEff
-            //this.controlRodInsertion += 0.02;
-            //adjustFactor = true;
+        if (pressure > maxPressure * 0.8 || temperature > (coolantExitTemperature + maxTemperature) / 2 ||
+                temperature > maxTemperature - 150 || temperature - prevTemperature > 30) {
+            if (kEff > 0.99) {
+                this.controlRodInsertion += 0.004;
+                adjustFactor = true;
+            }
+        } else if (temperature > coolantExitTemperature * 0.3 + coolantBaseTemperature * 0.7) {
+            if (kEff > 1.01) {
+                this.controlRodInsertion += 0.008;
+                adjustFactor = true;
+            } else if (kEff < 1.005) {
+                this.controlRodInsertion -= 0.001;
+                adjustFactor = true;
+            }
+        } else if (temperature > coolantExitTemperature * 0.1 + coolantBaseTemperature * 0.9) {
+            if (kEff > 1.025) {
+                this.controlRodInsertion += 0.012;
+                adjustFactor = true;
+            } else if (kEff < 1.015) {
+                this.controlRodInsertion -= 0.004;
+                adjustFactor = true;
+            }
         } else {
-
-
-            if (pressure > maxPressure * 0.8 || temperature > (coolantExitTemperature + maxTemperature) / 2 ||
-                    temperature > maxTemperature - 150 || temperature - prevTemperature > 30) {
-                if (kEff > 0.99) {
-                    this.controlRodInsertion += 0.004;
-                    adjustFactor = true;
-                }
-            } else if (temperature > coolantExitTemperature * 0.3 + coolantBaseTemperature * 0.7) {
-                if (kEff > 1.01) {
-                    this.controlRodInsertion += 0.008;
-                    adjustFactor = true;
-                } else if (kEff < 1.005) {
-                    this.controlRodInsertion -= 0.001;
-                    adjustFactor = true;
-                }
-            } else if (temperature > coolantExitTemperature * 0.1 + coolantBaseTemperature * 0.9) {
-                if (kEff > 1.025) {
-                    this.controlRodInsertion += 0.012;
-                    adjustFactor = true;
-                } else if (kEff < 1.015) {
-                    this.controlRodInsertion -= 0.004;
-                    adjustFactor = true;
-                }
-            } else {
-                if (kEff > 1.1) {
-                    this.controlRodInsertion += 0.02;
-                    adjustFactor = true;
-                } else if (kEff < 1.05) {
-                    this.controlRodInsertion -= 0.006;
-                    adjustFactor = true;
-                }
+            if (kEff > 1.1) {
+                this.controlRodInsertion += 0.02;
+                adjustFactor = true;
+            } else if (kEff < 1.05) {
+                this.controlRodInsertion -= 0.006;
+                adjustFactor = true;
             }
         }
 

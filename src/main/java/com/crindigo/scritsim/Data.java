@@ -133,7 +133,7 @@ public class Data
 
         public static final CoolantProperty boilingWaterCoolant =
                 new CoolantProperty(18, Fluids.boilingWater, Fluids.highPressureWetSteam,
-                        1, 1000,
+                        2, 1000,
                         558, 2260000, 4184)
                         .setAccumulatesHydrogen(true)
                         .setSlowAbsorptionFactor(0.1875)
@@ -141,7 +141,7 @@ public class Data
 
         public static final CoolantProperty pressurizedWaterCoolant =
                 new CoolantProperty(18, Fluids.pressurizedWater, Fluids.hotPressurizedWater,
-                        1, 1000,
+                        2, 1000,
                         588, 2260000, 4184)
                         .setAccumulatesHydrogen(true)
                         .setSlowAbsorptionFactor(0.1875)
@@ -150,10 +150,10 @@ public class Data
         public static final CoolantProperty pressurizedHeavyWaterCoolant =
                 new CoolantProperty(18, Fluids.pressurizedHeavyWater, Fluids.hotPressurizedHeavyWater,
                         4, 1000,
-                        588, 2064000, 4228)
+                        558, 2064000, 4228)
                         .setAccumulatesHydrogen(true)
-                        .setSlowAbsorptionFactor(0.1875)
-                        .setFastAbsorptionFactor(0.0625);
+                        .setSlowAbsorptionFactor(0.0625)
+                        .setFastAbsorptionFactor(0.03125);
 
         static {
             CoolantRegistry.registerCoolant(Fluids.distilledWater, distilledWaterCoolant);
