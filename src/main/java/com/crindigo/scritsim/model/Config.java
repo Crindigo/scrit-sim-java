@@ -6,9 +6,9 @@ public class Config {
 
     public static class NuclearOptions {
 
-        public double nuclearPowerMultiplier = 0.1;
+        public double nuclearPowerMultiplier = 0.05;
 
-        public double fissionCoolantDivisor = 14;
+        public double fissionCoolantDivisor = 4.49578125;
 
         public double fissionReactorResolution = 100;
 

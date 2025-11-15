@@ -150,7 +150,7 @@ public class Data
         public static final CoolantProperty pressurizedHeavyWaterCoolant =
                 new CoolantProperty(18, Fluids.pressurizedHeavyWater, Fluids.hotPressurizedHeavyWater,
                         4, 1000,
-                        558, 2064000, 4228)
+                        558, 2294000, 4228)
                         .setAccumulatesHydrogen(true)
                         .setSlowAbsorptionFactor(0.0625)
                         .setFastAbsorptionFactor(0.03125);
