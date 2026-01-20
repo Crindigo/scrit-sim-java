@@ -8,7 +8,7 @@ public class Config {
 
         public double nuclearPowerMultiplier = 0.05;
 
-        public double fissionCoolantDivisor = 4.49578125;
+        public double fissionCoolantDivisor = 35.96625;
 
         public double fissionReactorResolution = 100;
 

@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
@@ -423,6 +424,15 @@ public class SimulatorUI extends JFrame
             generatedCoolantWarmedUp.forEach((k, v) -> {
                 builder.append(k).append(" generated: ").append(v / 3600).append(" L/s<br>");
             });
+
+            int estEUt = 0;
+            for ( int coolantPerHour : generatedCoolantWarmedUp.values() ) {
+                // 2048 EU per L of coolant
+                estEUt += (int) ((coolantPerHour / 3600.0) * 2048 / 20);
+            }
+            builder.append("Estimated power gen: ")
+                    .append(NumberFormat.getIntegerInstance().format(estEUt))
+                    .append(" EU/t<br>");
         }
         return builder.toString();
     }
