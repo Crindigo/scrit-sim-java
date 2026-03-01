@@ -11,6 +11,11 @@ public interface ICoolantStats {
     Fluid getHotCoolant();
 
     /**
+     * @return Estimated eu/t per L of fluid.
+     */
+    double getEstimatedEUt();
+
+    /**
      * @return The specific heat capacity of the fluid in J/(kg*K).
      */
     double getSpecificHeatCapacity();

@@ -1,6 +1,7 @@
 package com.crindigo.scritsim.ui;
 
 import com.crindigo.scritsim.model.FissionReactor;
+import com.crindigo.scritsim.model.ICoolantStats;
 import com.crindigo.scritsim.model.components.CoolantChannel;
 import com.crindigo.scritsim.model.components.FuelRod;
 import com.crindigo.scritsim.model.components.ReactorComponent;
@@ -348,7 +349,7 @@ public class SimulatorUI extends JFrame
         // Track all types of consumed fuel and generated hot coolant
         Map<String, Double> consumedFuel = new HashMap<>();
         Map<String, Integer> generatedCoolant = new HashMap<>();
-        Map<String, Integer> generatedCoolantWarmedUp = new HashMap<>();
+        Map<ICoolantStats, Integer> generatedCoolantWarmedUp = new HashMap<>();
         int steps;
         for ( steps = 0; steps < totalSteps; steps++ ) {
             // scrit checks fuel depletion before updating state
@@ -372,7 +373,7 @@ public class SimulatorUI extends JFrame
 
                 // Track coolant for the latest hour of runtime when we know it's warmed up
                 if ( steps >= (totalSteps - 3600) ) {
-                    generatedCoolantWarmedUp.compute(hotCoolant,
+                    generatedCoolantWarmedUp.compute(cc.getCoolant(),
                             (k, v) -> (v == null) ? liters : (v + liters));
 
                     cc.setLastHourCoolantGenerated(cc.getLastHourCoolantGenerated() + liters);
@@ -414,7 +415,7 @@ public class SimulatorUI extends JFrame
                 builder.append("consume ").append(k).append(' ').append(v).append('\n');
             });
             generatedCoolantWarmedUp.forEach((k, v) -> {
-                builder.append("generate ").append(k).append(' ').append(v / 3600.).append('\n');
+                builder.append("generate ").append(k.getHotCoolant().getName()).append(' ').append(v / 3600.).append('\n');
             });
         } else {
             builder.append("Steps ran: ").append(steps).append("<br>");
@@ -422,13 +423,12 @@ public class SimulatorUI extends JFrame
                 builder.append(k).append(" consumed: ").append(String.format("%.3f", v)).append("<br>");
             });
             generatedCoolantWarmedUp.forEach((k, v) -> {
-                builder.append(k).append(" generated: ").append(v / 3600).append(" L/s<br>");
+                builder.append(k.getHotCoolant().getName()).append(" generated: ").append(v / 3600).append(" L/s<br>");
             });
 
             int estEUt = 0;
-            for ( int coolantPerHour : generatedCoolantWarmedUp.values() ) {
-                // 2048 EU per L of coolant
-                estEUt += (int) ((coolantPerHour / 3600.0) * 2048 / 20);
+            for ( Map.Entry<ICoolantStats, Integer> entry : generatedCoolantWarmedUp.entrySet() ) {
+                estEUt += (int) ((entry.getValue() / 3600.0) * entry.getKey().getEstimatedEUt() / 20);
             }
             builder.append("Estimated power gen: ")
                     .append(NumberFormat.getIntegerInstance().format(estEUt))

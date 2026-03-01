@@ -45,6 +45,9 @@ public class CoolantProperty implements ICoolantStats {
     @Getter
     private final double mass;
 
+    @Getter
+    private double estimatedEUt;
+
     public CoolantProperty(int materialMass, Fluid coolant, Fluid hotHPCoolant, double moderatorFactor,
                            double coolingFactor,
                            double boilingPoint, double heatOfVaporization,
@@ -65,6 +68,11 @@ public class CoolantProperty implements ICoolantStats {
 
     public CoolantProperty setAccumulatesHydrogen(boolean accumulatesHydrogen) {
         this.accumulatesHydrogen = accumulatesHydrogen;
+        return this;
+    }
+
+    public CoolantProperty setEstimatedEUt(double estimatedEUt) {
+        this.estimatedEUt = estimatedEUt;
         return this;
     }
 

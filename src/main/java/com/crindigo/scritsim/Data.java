@@ -127,6 +127,7 @@ public class Data
                 new CoolantProperty(18, Fluids.distilledWater, Fluids.highPressureSteam,
                         2., 1000,
                         373, 2260000, 4168.)
+                        .setEstimatedEUt(2048.0) // idk nobody uses this
                         .setAccumulatesHydrogen(true)
                         .setSlowAbsorptionFactor(0.1875)
                         .setFastAbsorptionFactor(0.0625);
@@ -135,6 +136,7 @@ public class Data
                 new CoolantProperty(18, Fluids.boilingWater, Fluids.highPressureWetSteam,
                         2, 1000,
                         558, 2260000, 4184)
+                        .setEstimatedEUt(2048.0)
                         .setAccumulatesHydrogen(true)
                         .setSlowAbsorptionFactor(0.1875)
                         .setFastAbsorptionFactor(0.0625);
@@ -143,6 +145,7 @@ public class Data
                 new CoolantProperty(18, Fluids.pressurizedWater, Fluids.hotPressurizedWater,
                         2, 1000,
                         588, 2260000, 4184)
+                        .setEstimatedEUt(8396.8) // 400L makes 1640L steam so 1640/400 * 2048
                         .setAccumulatesHydrogen(true)
                         .setSlowAbsorptionFactor(0.1875)
                         .setFastAbsorptionFactor(0.0625);
@@ -151,6 +154,7 @@ public class Data
                 new CoolantProperty(18, Fluids.pressurizedHeavyWater, Fluids.hotPressurizedHeavyWater,
                         4, 1000,
                         558, 2294000, 4228)
+                        .setEstimatedEUt(7946.6667) // 384L makes 1490L steam so 1490/384 * 2048
                         .setAccumulatesHydrogen(true)
                         .setSlowAbsorptionFactor(0.0625)
                         .setFastAbsorptionFactor(0.03125);

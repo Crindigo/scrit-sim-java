@@ -64,6 +64,7 @@ public class CoolantChannel extends ReactorComponent {
         details.addFirst("<b>" + coolant.getCoolant().getName() + "</b>");
         details.add(String.format("Weight: %.6f", weight));
         details.add(String.format("Coolant Generation: %.2f L/s", lastHourCoolantGenerated / 3600f));
+        details.add(String.format("Energy Density: %d EU/L", (int) coolant.getEstimatedEUt()));
         return details;
     }
 }
